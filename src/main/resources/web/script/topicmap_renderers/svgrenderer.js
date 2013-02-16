@@ -7,6 +7,14 @@ function SvgRenderer(){
 
     this.dom = $("<svg>", {id: "canvas"})
 
+  // === TopicmapRenderer Implementation ===
+
+    this.get_info = function() {
+        return {
+                uri: "dm4.webclient.svg_renderer",
+                name: "SVG Topicmap"
+        }
+    }
 
     // === TopicmapRenderer Topicmaps Extension ===
 
