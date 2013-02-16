@@ -1,0 +1,60 @@
+{
+    topic_types: [
+        {
+            value: "Title",
+            uri: "dm4.notes.title",
+            data_type_uri: "dm4.core.text",
+            index_mode_uris: ["dm4.core.fulltext"]
+        },
+        {
+            value: "Text",
+            uri: "dm4.notes.text",
+            data_type_uri: "dm4.core.html",
+            index_mode_uris: ["dm4.core.fulltext"]
+        },
+        {
+            value: "Note",
+            uri: "dm4.notes.note",
+            data_type_uri: "dm4.core.composite",
+            assoc_defs: [
+                {
+                    part_type_uri:        "dm4.notes.title",
+                    part_cardinality_uri: "dm4.core.one",
+                    assoc_type_uri:       "dm4.core.composition_def",
+                    view_config_topics: [
+                        {
+                            type_uri: "dm4.webclient.view_config",
+                            composite: {
+                                dm4.webclient.simple_renderer_uri: "dm4.webclient.title_renderer"
+                            }
+                        }
+                    ]
+                },
+                {
+                    part_type_uri:        "dm4.notes.text",
+                    part_cardinality_uri: "dm4.core.one",
+                    assoc_type_uri:       "dm4.core.composition_def",
+                    view_config_topics: [
+                        {
+                            type_uri: "dm4.webclient.view_config",
+                            composite: {
+                                dm4.webclient.simple_renderer_uri: "dm4.webclient.body_text_renderer",
+                                dm4.webclient.rows: 15
+                            }
+                        }
+                    ]
+                }
+            ],
+            view_config_topics: [
+                {
+                    type_uri: "dm4.webclient.view_config",
+                    composite: {
+                        dm4.webclient.icon: "/de.deepamehta.notes/images/yellow-ball.png",
+                        dm4.webclient.add_to_create_menu: true,
+                        dm4.webclient.is_searchable_unit: true
+                    }
+                }
+            ]
+        }
+    ]
+}
