@@ -4,7 +4,6 @@ function SvgRenderer(){
    // ------------------------------------------------------------------------------------------------ Constructor Code
 
     js.extend(this, TopicmapRenderer)
-https://github.com/joernweissenborn/dm4-svgrenderer/tree/master/src/main/resources/web/script/topicmap_renderers
     this.dom = $("<svg>", {id: "canvas"})
     
       // === TopicmapRenderer Implementation ===
