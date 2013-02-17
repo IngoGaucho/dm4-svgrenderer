@@ -1,45 +1,14 @@
 package de.deepamehta.plugins.svgrenderer;
 
 
-
-import de.deepamehta.plugins.svgrenderer.SvgRenderer      ;
-
-import de.deepamehta.plugins.topicmaps.service.TopicmapsService;
-
-
-import de.deepamehta.core.Association;
-import de.deepamehta.core.AssociationDefinition;
-import de.deepamehta.core.RelatedTopic;
-import de.deepamehta.core.ResultSet;
-import de.deepamehta.core.Topic;
-import de.deepamehta.core.TopicType;
-import de.deepamehta.core.model.AssociationModel;
-import de.deepamehta.core.model.CompositeValue;
-import de.deepamehta.core.model.TopicModel;
-import de.deepamehta.core.model.TopicRoleModel;
 import de.deepamehta.core.osgi.PluginActivator;
-import de.deepamehta.core.service.ClientState;
-import de.deepamehta.core.service.Directives;
 import de.deepamehta.core.service.PluginService;
 import de.deepamehta.core.service.annotation.ConsumesService;
-import de.deepamehta.core.service.event.PostCreateTopicListener;
-import de.deepamehta.core.service.event.PostUpdateTopicListener;
-import de.deepamehta.core.service.event.PreSendTopicListener;
-import de.deepamehta.core.util.JavaUtils;
+import de.deepamehta.plugins.topicmaps.service.TopicmapsService;
 
-import org.codehaus.jettison.json.JSONObject;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
-
-import java.net.URL;
-import java.util.List;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import java.util.logging.Logger;
 
 
@@ -60,7 +29,7 @@ public class SvgrendererPlugin extends PluginActivator {
 
     @Override
     public void init() {
-        topicmapsService.registerTopicmapRenderer(new SvgRenderer());
+        topicmapsService.registerTopicmapRenderer(new SvgRenderEngine());
     }
 
     @Override
