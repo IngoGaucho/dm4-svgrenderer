@@ -10,7 +10,7 @@ function SvgRenderer(){
 
     this.get_info = function() {
         return {
-                uri: "dm4.webclient.svg_renderer",
+                uri: "dm4.svgrenderer.svg_renderer",
                 name: "SVG Topicmap"
         }
     }
