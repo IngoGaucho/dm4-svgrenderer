@@ -1,19 +1,40 @@
+
+
 function TopicRenderer(topic){
-    width = 30
-    height = 30
-    element = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+
+    var element = document.createElementNS("http://www.w3.org/2000/svg","svg")
+
+    //this.self = document.createElementNS("http://www.w3.org/2000/svg", "svg")
     element.setAttribute("id",topic.id)
     //create new element
 
+    // events
+     this.connect = function(event, listener) {
+     		if (listener != null) {
+     	    element.addEventListener(event, listener);
+     		}
+     	}
+
+     this.connectAll = function() {
+     		this.connect("click", this.onclick);
+     		//this.connect("dblclick", this.ondblclick);
+     		//this.connect("mouseover", this.onmouseover);
+     		//this.connect("mouseout", this.onmouseout);
+     		//this.connect("mousedown", this.onmousedown);
+     	}
 
 
 
+            this.onclick = function(e) {
+                alert("Hello World!");
+        }
 
 
     this.render = function (parentID){
     //function render(parentID){
     generate_svg()
     $(parentID).append(element)
+    		this.connectAll();
     }
 
        generate_svg = function() {
