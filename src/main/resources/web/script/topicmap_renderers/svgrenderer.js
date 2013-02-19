@@ -30,6 +30,7 @@ function SvgRenderer(){
         //We are not able to use plain jquery!
         var newtmap = document.createElementNS("http://www.w3.org/2000/svg", "svg")
         newtmap.setAttribute("id","Mom")
+        this.dom.append(newtmap);
 
         //Now append all Topics as childs
         display_topics()
@@ -39,7 +40,9 @@ function SvgRenderer(){
 
         function display_topics() {
             topicmap.iterate_topics(function(topic) {
-                var newelement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                var topicelement = new TopicRenderer(topic)
+                topicelement.render('#Mom')
+               /* var newelement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                 newelement.setAttribute("id",topic.id)
                 var ball = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 ball.setAttribute("cx", topic.x);
@@ -54,7 +57,7 @@ function SvgRenderer(){
                 text.appendChild(document.createTextNode(topic.label))
                 newelement.appendChild(text)
 
-                newtmap.appendChild(newelement)
+                newtmap.appendChild(newelement)*/
 
             })
         }

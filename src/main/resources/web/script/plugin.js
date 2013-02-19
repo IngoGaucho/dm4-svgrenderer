@@ -1,6 +1,8 @@
 dm4c.add_plugin("de.deepamehta.svgrenderer", function(){
 
 dm4c.load_script("/de.deepamehta.svgrenderer/script/topicmap_renderers/svgrenderer.js")
+dm4c.load_script("/de.deepamehta.svgrenderer/script/topicrenderer/topicrenderer.js")
+
 dm4c.load_script("/de.deepamehta.topicmaps/script/model/topicmap.js")
 
 
