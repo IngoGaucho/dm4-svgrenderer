@@ -34,35 +34,34 @@ function SvgRenderer(){
 
         //Now append all Topics as childs
         display_topics()
+        display_associations()
 
         //then append the whole construct
         this.dom.append(newtmap);
 
         function display_topics() {
             topicmap.iterate_topics(function(topic) {
-                var topicelement = new TopicRenderer(topic)
-                topicelement.render('#Mom')
-               /* var newelement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                newelement.setAttribute("id",topic.id)
-                var ball = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                ball.setAttribute("cx", topic.x);
-                ball.setAttribute("cy", topic.y);
-                ball.setAttribute("r", "20");
-                ball.setAttribute("fill", "#336699");
-                newelement.appendChild(ball)
-                var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
-                text.setAttribute("x",topic.x)
-                text.setAttribute("y", topic.y-30);
-                text.setAttribute("fill", "red");
-                text.appendChild(document.createTextNode(topic.label))
-                newelement.appendChild(text)
+            var topicelement = new TopicRenderer(topic)
+            topicelement.render('#Mom')
+            })
+        }
 
-                newtmap.appendChild(newelement)*/
 
+
+        function display_associations() {
+            topicmap.iterate_associations(function(assoc, ct1, ct2) {
+                //var ct1 = topicmap.get_topic(assoc.topic_id_1)
+                //var coords = ct1.x
+                //var t1 = new Topic
+                //var t1 = assoc.get_topic_1()
+                alert(ct2.label)
+                //var svgassoc = new Object()
+                //svgassoc={orgassoc:assoc,ct1: t1.label}
+                var assocelement = new AssocRenderer(assoc, ct1, ct2)
+                assocelement.render('#Mom')
             })
         }
     }
-
     // === Left SplitPanel Component Implementation ===
 
     this.init = function() {

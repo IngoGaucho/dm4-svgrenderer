@@ -1,7 +1,6 @@
 
 
 function TopicRenderer(topic){
-    var model = new DefaultTopicmapRenderer.Model()
     //Vars for kinetics
     var dragON = false
     var prevx = 0
@@ -50,18 +49,12 @@ function TopicRenderer(topic){
 
 
            this.onmousemove = function(e) {
-                 SVGDocument = e.target.ownerDocument;
-                  SVGRoot = SVGDocument.documentElement;
-
-                  topicx = prevx+(prevx-e.x)
-                  topicy = prevy+(prevx-e.y)
-                  prevx = e.x
-                  prevy = e.y
-
-
                 if (dragON) {
-
-                    $("#"+topic.id+"text").text(topicy+" "+e.y)
+                     topicx = topicx+(e.x-prevx)
+                     topicy = topicy+(e.y-prevy)
+                                      prevx = e.x
+                                      prevy = e.y
+                    $("#"+topic.id+"text").text(topicx+" "+topicy)
                     $("#"+topic.id+"group").attr("transform","translate("
                         +topicx+
                         ","
