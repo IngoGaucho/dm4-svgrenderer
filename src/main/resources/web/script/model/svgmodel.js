@@ -7,7 +7,7 @@
  */
 function Svgmap(topicmap_id, config) {
 
-    var LOG_TOPICMAPS = false
+    var LOG_TOPICMAPS = true
     var self = this
 
     var info                // The underlying Topicmap topic (a Topic object)
@@ -92,7 +92,6 @@ function Svgmap(topicmap_id, config) {
         // update memory
         // topic.move_to(x, y)
         // update DB
-
         var cas = this.get_associations(id)
         for (var i = 0, ca; ca = cas[i]; i++) {
             if(ca.topic_id_1 == topic.id){
@@ -152,9 +151,10 @@ function Svgmap(topicmap_id, config) {
 
         if (a) {
             if (LOG_TOPICMAPS) dm4c.log("..... Updating association " + a.id + " on topicmap " + topicmap_id)
+            assoc.parent = a.parent
             a.remove()
             assocs[assoc.id] = assoc
-            assoc.render("#Mom")
+            assoc.render()
 
         }
     }
@@ -224,9 +224,16 @@ function Svgmap(topicmap_id, config) {
 
     this.set_translation = function(trans_x, trans_y) {
         // update memory
-        this.trans_x = trans_x
-        this.trans_y = trans_y
+
+        this.iterate_topics(function(topic){
+           topic.move_to(topic.glob_x+trans_x, topic.glob_y+trans_y)
+        })
+        this.iterate_associations(function(assoc){
+            assoc.move_to(assoc.glob_x+trans_x, assoc.glob_y+trans_y)
+        })
+
         // update DB
+
         if (is_writable()) {
             dm4c.restc.set_topicmap_translation(topicmap_id, trans_x, trans_y)
         }
@@ -248,14 +255,13 @@ function Svgmap(topicmap_id, config) {
 
         var topicmap = dm4c.restc.get_topicmap(topicmap_id)
         info = new Topic(topicmap.info)
-
+                init_translation()
         if (LOG_TOPICMAPS) dm4c.log("..... " + topicmap.topics.length + " topics")
         init_topics()
 
         if (LOG_TOPICMAPS) dm4c.log("..... " + topicmap.assocs.length + " associations")
         init_associations()
 
-        init_translation()
         init_background_image()
 
         function init_topics() {
@@ -265,7 +271,7 @@ function Svgmap(topicmap_id, config) {
                 var visibility = topic.visualization["dm4.topicmaps.visibility"].value
                 if (LOG_TOPICMAPS) dm4c.log(".......... ID " + topic.id + ": type_uri=\"" + topic.type_uri +
                     "\", label=\"" + topic.value + "\", x=" + x + ", y=" + y + ", visibility=" + visibility)
-                topics[topic.id] = new SvgTopic(topic.id, topic.type_uri, topic.value, x, y, visibility)
+                topics[topic.id] = new SvgTopic(topic.id, topic.type_uri, topic.value, x, y, visibility, this.trans_x, this.trans_y)
             }
         }
 
@@ -276,7 +282,7 @@ function Svgmap(topicmap_id, config) {
                 assocs[assoc.id] = new SvgAssociation(assoc.id, assoc.type_uri,
                     assoc.role_1.topic_id, assoc.role_2.topic_id, topics[assoc.role_1.topic_id].x,
                     topics[assoc.role_1.topic_id].y,topics[assoc.role_2.topic_id].x,
-                    topics[assoc.role_2.topic_id].y)
+                    topics[assoc.role_2.topic_id].y, this.trans_x, this.trans_y)
             }
         }
 
@@ -284,8 +290,9 @@ function Svgmap(topicmap_id, config) {
 
         function init_translation() {
             var trans = info.get("dm4.topicmaps.state").get("dm4.topicmaps.translation")
-            self.trans_x = trans.get("dm4.topicmaps.translation_x")
-            self.trans_y = trans.get("dm4.topicmaps.translation_y")
+            this.trans_x = trans.get("dm4.topicmaps.translation_x")
+            this.trans_y = trans.get("dm4.topicmaps.translation_y")
+
         }
 
         function init_background_image() {

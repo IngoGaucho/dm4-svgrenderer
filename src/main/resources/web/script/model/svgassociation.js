@@ -1,4 +1,4 @@
-function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2) {
+function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, glob_x, glob_y) {
 
         this.id = id
         this.type_uri = type_uri
@@ -7,7 +7,10 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2) {
         this.x1 = x1
         this.y1 = y1
         this.x2 = x2
-         this.y2 = y2
+        this.y2 = y2
+        this.parent
+        this.glob_x = glob_x
+        this.glob_y = glob_y
 
 
 
@@ -31,6 +34,15 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2) {
             $("#"+this.id).remove()
         }
 
+        this.move_to = function(x, y) {
+                    this.glob_x = x
+                    this.glob_y = y
+                    $("#"+id+"assocgroup").attr("transform","translate("
+                                     +this.glob_x+
+                                     ","
+                                     +this.glob_y+
+                                     ")")
+                }
         // ---
 
         function reset_selection() {
@@ -41,10 +53,15 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2) {
 
 
 
-            this.render = function (parentID){
+            this.render = function (){
 
                         group = document.createElementNS("http://www.w3.org/2000/svg", "g")
                         group.setAttribute("id",this.id+"assocgroup")
+                        group.setAttribute("transform","translate("
+                                                             +this.glob_x+
+                                                             ","
+                                                             +this.glob_y+
+                                                             ")")
                         var assocline = document.createElementNS("http://www.w3.org/2000/svg", "path");
                         assocline.setAttribute("id", topic_id_1+" und "+topic_id_1)
                         //assocline.setAttribute("d", "M "+"200"+" "+"200"+" l "+"300"+" "+"300");
@@ -57,7 +74,7 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2) {
                         group.appendChild(assocline)
                         element.appendChild(group)
 
-            $(parentID).append(element)
+            $(this.parent).append(element)
             }
 
             this.is_player_topic = function(topic_id) {
@@ -72,11 +89,11 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2) {
                         return this.topic_id_2
                     }
 
-            function build_topic(topic){
-                 return new Topic(topic)
-                 }
 
 
+             this.setParent = function(dom){
+                   this.parent = dom
+                }
 
 
     }

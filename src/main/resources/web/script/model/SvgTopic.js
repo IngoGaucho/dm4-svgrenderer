@@ -1,5 +1,5 @@
 
-    function SvgTopic(id, type_uri, label, x, y, visibility) {
+    function SvgTopic(id, type_uri, label, x, y, visibility, glob_x, glob_y) {
 
         this.id = id
         this.type_uri = type_uri
@@ -8,7 +8,10 @@
         this.y = y
         this.visibility = visibility
         this.dom_id = "#"+id
-
+        this.glob_x = glob_x
+        this.glob_y = glob_y
+        var self = this
+        this.parent
         //Vars for kinetics
         var dragON = false
         var prevx = 0
@@ -37,8 +40,14 @@
         }
 
         this.move_to = function(x, y) {
-            this.x = x
-            this.y = y
+
+            this.glob_x = x
+            this.glob_y = y
+            $("#"+id+"group").attr("transform","translate("
+                             +this.getRealCoords().rx+
+                             ","
+                             +this.getRealCoords().ry+
+                             ")")
         }
 
         /**
@@ -64,13 +73,12 @@
 
     //The actual rendering stuff. This needs further abstraction!
 
-    this.render = function (parentID){
-
+    this.render = function (){
         //Create group to contain all childs. this makes placing and transforming independent of the rest of the SVG
         group = document.createElementNS("http://www.w3.org/2000/svg", "g")
         //Named by convention :)
         group.setAttribute("id",this.id+"group")
-        group.setAttribute("transform","translate("+this.x+","+this.y+")")
+        group.setAttribute("transform","translate("+this.getRealCoords().rx+","+this.getRealCoords().ry+")")
 
         //From this part on one could draw nian cats, the model would happily drag her
         //over screen :)
@@ -97,7 +105,7 @@
         //now append this to our parent
         domelement.appendChild(group)
         //and than everything to the canvas-dom
-        $(parentID).append(domelement)
+        $(this.parent).append(domelement)
     	this.connectAll();
     }
 
@@ -128,20 +136,18 @@
 
     this.onmousemove = function(e) {
          if (dragON) {
-             cx = cx+(e.x-prevx)
-             cy = cy+(e.y-prevy)
+             self.x = self.x+(e.x-prevx)
+             self.y = self.y+(e.y-prevy)
              prevx = e.x
              prevy = e.y
              //$("#"+id+"text").text(cx+" "+cy)
              $("#"+id+"group").attr("transform","translate("
-                 +cx+
+                 +self.getRealCoords().rx+
                  ","
-                 +cy+
+                 +self.getRealCoords().ry+
                  ")")
 
-         this.x = cx
-         this.y = cy
-         dm4c.fire_event("post_move_topic", new SvgTopic(id, type_uri, label, cx, cy, visibility))
+         dm4c.fire_event("post_move_topic", new SvgTopic(id, type_uri, label, self.x, self.y, visibility))
 
          }
     }
@@ -163,5 +169,17 @@
         //$("#"+this.id+"text").text('dragstop')
         dragON = false
 
+
     }
-}
+
+    this.setParent = function(dom){
+       this.parent = dom
+    }
+
+    this.getRealCoords = function() {
+        var rx = this.x+this.glob_x
+        var ry = this.y+this.glob_y
+        return {"rx":rx,"ry": ry}
+    }
+
+        }

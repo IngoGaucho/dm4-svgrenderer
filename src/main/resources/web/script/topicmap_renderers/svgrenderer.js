@@ -6,6 +6,11 @@ function SvgRenderer(){
     js.extend(this, TopicmapRenderer)
     this.dom = $("<div>", {id: "canvas"})
 
+    //Construct dom
+    var newtmap = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+    var dom_id
+
+
       // === TopicmapRenderer Implementation ===
 
     this.get_info = function() {
@@ -26,22 +31,21 @@ function SvgRenderer(){
     this.display_topicmap = function(topicmap, no_history_update) {
 
         //First we need a "Mom" SVG element which has all visible elements as childs
-        //We need to use createElementNS method because svg and html namespaces are not compatible
-        //We are not able to use plain jquery!
-        var newtmap = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-        newtmap.setAttribute("id","Mom")
-        this.dom.append(newtmap);
-
+        dom_id = "#topicmap"+topicmap.get_id()
+        newtmap.setAttribute("id","topicmap"+topicmap.get_id())
+               dom_id2 = "topicmap"+topicmap.get_id()
+ this.dom.append(newtmap);
         //Now append all Topics as childs
         display_topics()
         display_associations()
-
+        this.connectAll()
         //then append the whole construct
         this.dom.append(newtmap);
 
         function display_topics() {
             topicmap.iterate_topics(function(topic) {
-            topic.render('#Mom')
+            topic.parent = dom_id
+            topic.render()
             })
         }
 
@@ -49,8 +53,8 @@ function SvgRenderer(){
 
         function display_associations() {
             topicmap.iterate_associations(function(assoc) {
-
-                assoc.render('#Mom')
+                assoc.parent = dom_id
+                assoc.render()
             })
         }
     }
@@ -106,7 +110,7 @@ function SvgRenderer(){
 
     this.init = function() {
     }
-
+              //#TODO:Redraw geht nich
     this.resize = function(size) {
         this.dom.width(size.width).height(size.height)
         }
@@ -114,4 +118,62 @@ function SvgRenderer(){
     this.resize_end = function() {
 
     }
+
+    //== Eventhandling Helper Functions
+
+    this.connect = function(event, listener) {
+       	if (listener != null) {
+     	    newtmap.addEventListener(event, listener);
+       	}
+    }
+
+    this.connectAll = function() {
+       	//this.connect("click", this.onclick);
+        //this.connect("dblclick", this.ondblclick);
+        //this.connect("mouseover", this.onmouseover);
+        this.connect("mouseout", this.onmouseout);
+        this.connect("mousedown", this.onmousedown);
+        this.connect("mouseup", this.onmouseup);
+        this.connect("mousemove", this.onmousemove);
+}
+
+    //== Eventhandlers
+
+    // Kinetics
+    var drag = false
+    var cx = 0
+    var cy = 0
+    var prevx, prevy
+
+    function dragEnd(){
+        drag = false
+    }
+    this.onmouseout = function(e) {
+            if(drag){dragEnd()}
+    }
+
+    this.onmouseup = function(e) {
+        if(drag){dragEnd()}
+    }
+
+
+    this.onmousemove = function(e) {
+             if (drag) {
+                 cx = (e.x-prevx)
+                 cy = (e.y-prevy)
+                 prevx = e.x
+                 prevy = e.y
+                 dm4c.fire_event("post_move_canvas", cx, cy)
+
+              }
+    }
+    this.onmousedown = function(e) {
+            if (e.target == document.getElementById(dom_id2)){
+                drag = true
+                prevx = e.x
+                prevy = e.y
+            }
+        }
+
+
 }
