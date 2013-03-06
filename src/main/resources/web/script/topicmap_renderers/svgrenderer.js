@@ -20,7 +20,7 @@ function SvgRenderer(){
     // === TopicmapRenderer Topicmaps Extension ===
 
     this.load_topicmap = function(topicmap_id, config) {
-            return new Topicmap(topicmap_id, config)
+            return new Svgmap(topicmap_id, config)
     }
 
     this.display_topicmap = function(topicmap, no_history_update) {
@@ -41,27 +41,67 @@ function SvgRenderer(){
 
         function display_topics() {
             topicmap.iterate_topics(function(topic) {
-            var topicelement = new TopicRenderer(topic)
-            topicelement.render('#Mom')
+            topic.render('#Mom')
             })
         }
 
 
 
         function display_associations() {
-            topicmap.iterate_associations(function(assoc, ct1, ct2) {
-                //var ct1 = topicmap.get_topic(assoc.topic_id_1)
-                //var coords = ct1.x
-                //var t1 = new Topic
-                //var t1 = assoc.get_topic_1()
-                alert(ct2.label)
-                //var svgassoc = new Object()
-                //svgassoc={orgassoc:assoc,ct1: t1.label}
-                var assocelement = new AssocRenderer(assoc, ct1, ct2)
-                assocelement.render('#Mom')
+            topicmap.iterate_associations(function(assoc) {
+
+                assoc.render('#Mom')
             })
         }
     }
+
+      /**
+         * Updates an association. If the association is not on the canvas nothing is performed.
+         */
+         //let me be called by this
+        this.update_association = function(assoc) {
+            var ca = Svgmap.get_association(assoc.id)
+            if (!ca) {
+                return
+            }
+
+            alert("ping")
+        }
+
+
+           // === Selection ===
+
+            /**
+             * Selects a topic, that is it is rendered as highlighted.
+             * If the topic is not present on the canvas nothing is performed. ### FIXDOC (explain): In this case
+             * there is still a value returned.
+             *
+             * @return  an object with "select" and "display" properties (both values are Topic objects).
+             */
+            this.select_topic = function(topic_id) {}
+
+            this.select_association = function(assoc_id) {}
+
+            this.reset_selection = function(refresh_canvas) {}
+
+            // ---
+
+            this.scroll_topic_to_center = function(topic_id) {}
+
+            this.begin_association = function(topic_id, x, y) {}
+
+            this.refresh = function() {alert("refresh");}
+
+            this.close_context_menu = function() {}
+
+            // === Grid Positioning ===
+
+            this.start_grid_positioning = function() {}
+
+            this.stop_grid_positioning = function() {}
+
+
+
     // === Left SplitPanel Component Implementation ===
 
     this.init = function() {

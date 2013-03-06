@@ -25,10 +25,8 @@ function TopicRenderer(topic){
      this.connect = function(event, listener) {
      		if (listener != null) {
      	    element.addEventListener(event, listener);
-
-
      		}
-     	}
+     }
 
      this.connectAll = function() {
      		this.connect("click", this.onclick);
