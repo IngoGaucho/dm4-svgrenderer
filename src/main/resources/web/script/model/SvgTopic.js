@@ -1,9 +1,9 @@
 
-    function SvgTopic(id, type_uri, label, x, y, visibility, glob_x, glob_y) {
+    function SvgTopic(id, type_uri, value, x, y, visibility, glob_x, glob_y) {
 
         this.id = id
         this.type_uri = type_uri
-        this.label = label      // ### FIXME: rename to "value"
+        this.value = value      // ### FIXME: rename to "value"
         this.x = x
         this.y = y
         this.visibility = visibility
@@ -54,7 +54,7 @@
          * @param   topic   a Topic object
          */
         this.update = function(topic) {
-            //this.label = topic.value
+            //this.value = topic.value
         }
 
         this.remove = function() {
@@ -105,7 +105,7 @@
         text.setAttribute("x",0)
         text.setAttribute("y", 30);
         text.setAttribute("fill", "red");
-        text.appendChild(document.createTextNode(this.label))
+        text.appendChild(document.createTextNode(this.value))
         group.appendChild(text)
 
         //now append this to our parent
@@ -131,7 +131,7 @@
         this.connect("mousedown", this.onmousedown);
         this.connect("mouseup", this.onmouseup);
         this.connect("mousemove", this.onmousemove);
-    }
+     }
 
     this.onmousedown = function(e) {
         //$('#'+id+"text").text('dragstart')
@@ -153,7 +153,7 @@
                  +self.getRealCoords().ry+
                  ")")
 
-         dm4c.fire_event("post_move_topic", new SvgTopic(id, type_uri, label, self.x, self.y, visibility))
+         dm4c.fire_event("post_move_topic", new SvgTopic(id, type_uri, value, self.x, self.y, visibility))
 
          }
     }
@@ -167,8 +167,7 @@
     }
 
     this.onclick = function(e) {
-        //alert("Hello World!");
-        //$("#"+topic.id+"ball").attr("fill","blue")
+     dm4c.do_select_topic(id)
     }
 
     function dragOFF(){

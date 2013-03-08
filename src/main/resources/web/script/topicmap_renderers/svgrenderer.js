@@ -42,15 +42,6 @@ function SvgRenderer(){
         display_associations()
         this.connectAll()
 
-        function clear_dom(dom){
-            while (dom.lastChild) {
-                dom.removeChild(dom.lastChild);
-            }
-        }
-
-
-
-
         function display_topics() {
             topicmap.iterate_topics(function(topic) {
             topic.parent = "#"+dom_id
@@ -58,12 +49,11 @@ function SvgRenderer(){
             })
         }
 
-
-
         function display_associations() {
             topicmap.iterate_associations(function(assoc) {
                 assoc.parent = "#"+dom_id
-                assoc.render()
+                assoc.render()         //let me be called by this
+
             })
         }
     }
@@ -71,14 +61,8 @@ function SvgRenderer(){
       /**
          * Updates an association. If the association is not on the canvas nothing is performed.
          */
-         //let me be called by this
         this.update_association = function(assoc) {
-            var ca = Svgmap.get_association(assoc.id)
-            if (!ca) {
-                return
-            }
 
-            alert("ping")
         }
 
 
@@ -91,7 +75,12 @@ function SvgRenderer(){
              *
              * @return  an object with "select" and "display" properties (both values are Topic objects).
              */
-            this.select_topic = function(topic_id) {}
+            this.select_topic = function(topic_id) {
+                    var topic = dm4c.fetch_topic(topic_id)
+
+                    return {select: topic, display: topic}
+
+            }
 
             this.select_association = function(assoc_id) {}
 
@@ -103,7 +92,7 @@ function SvgRenderer(){
 
             this.begin_association = function(topic_id, x, y) {}
 
-            this.refresh = function() {alert("refresh");}
+            this.refresh = function() {}
 
             this.close_context_menu = function() {}
 
@@ -114,7 +103,6 @@ function SvgRenderer(){
 
     this.init = function() {
     }
-              //#TODO:Redraw geht nich
     this.resize = function(size) {
         this.dom.width(size.width).height(size.height)
         }
@@ -123,6 +111,18 @@ function SvgRenderer(){
 
     }
 
+    this.add_topic = function(topic, do_select) {
+        topic.x = 0
+        topic.y = 0
+        actual_map.add_topic(topic.id, topic.type_uri, "new", topic.x , topic.y, "#"+dom_id)
+        return topic
+    }
+
+        this.update_topic = function(topic, refresh_canvas) {
+
+
+
+    }
     //== Eventhandling Helper Functions
 
     this.connect = function(event, listener) {

@@ -45,26 +45,32 @@ function Svgmap(topicmap_id, config) {
         iterate_associations(visitor_func)
     }
 
-    this.add_topic = function(id, type_uri, label, x, y) {
+    this.add_topic = function(id, type_uri, label, x, y, parent) {
         var topic = topics[id]
         if (!topic) {
             if (LOG_TOPICMAPS) dm4c.log("Adding topic " + id + " (\"" + label + "\") to topicmap " + topicmap_id)
             // update memory
-            topics[id] = new SvgTopic(id, type_uri, label, x, y, true)     // visibility=true
+            //topics[id] = new SvgTopic(id, type_uri, label, x, y, true, trans_x, trans_y)
+            alert("Adding topic " + id + " (\"" + label + "\") to topicmap " + topicmap_id)
+            topics[id] = new SvgTopic(id, type_uri, label, x, y, true, trans_x, trans_y)     // visibility=true
+            var topic = topics[id]
+            topic.label = "new "+type_uri
+            topic.parent = parent
+            topic.render()
             // update DB
             if (is_writable()) {
                 dm4c.restc.add_topic_to_topicmap(topicmap_id, id, x, y)
             }
-        } else if (!topic.visibility) {
+        }/* else if (!topic.visibility) {
             if (LOG_TOPICMAPS)
                 dm4c.log("Showing topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
             // update memory
-            topic.show()
+            topic.render()
             // update DB
             if (is_writable()) {
                 dm4c.restc.set_topic_visibility(topicmap_id, id, true)
             }
-        } else {
+        } */else {
             if (LOG_TOPICMAPS)
                 dm4c.log("Topic " + id + " (\"" + label + "\") already visible in topicmap " + topicmap_id)
         }
@@ -139,7 +145,12 @@ function Svgmap(topicmap_id, config) {
         if (t) {
             if (LOG_TOPICMAPS) dm4c.log("..... Updating topic " + t.id + " (\"" + t.label + "\") on topicmap " +
                 topicmap_id)
-            t.update(topic)
+        t.remove()
+        t.value = topic.value
+        topics[topic.id].value = topic.value
+        //#TODO there is a more legant way
+        t.render()
+
         }
     }
 
