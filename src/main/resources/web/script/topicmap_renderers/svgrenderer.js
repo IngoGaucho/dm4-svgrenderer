@@ -82,7 +82,12 @@ function SvgRenderer(){
 
             }
 
-            this.select_association = function(assoc_id) {}
+            this.select_association = function(assoc_id) {
+                // 1) fetch from DB
+                var assoc = dm4c.fetch_association(assoc_id)
+                return assoc
+
+            }
 
             this.reset_selection = function(refresh_canvas) {}
 

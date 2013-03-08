@@ -164,7 +164,11 @@ function Svgmap(topicmap_id, config) {
             if (LOG_TOPICMAPS) dm4c.log("..... Updating association " + a.id + " on topicmap " + topicmap_id)
             assoc.parent = a.parent
             a.remove()
-            assocs[assoc.id] = assoc
+            if(assoc.x1) assocs[assoc.id] = assoc
+            else{
+            assocs[assoc.id].type_uri = assoc.type_uri
+            assoc = assocs[assoc.id]
+            }
             assoc.render()
 
         }
@@ -193,8 +197,8 @@ function Svgmap(topicmap_id, config) {
     }
 
     this.set_association_selection = function(assoc) {
-        this.selected_object_id = assoc.id
-        this.is_topic_selected = false
+        //this.selected_object_id = assoc.id
+        //this.is_topic_selected = false
     }
 
     this.reset_selection = function() {

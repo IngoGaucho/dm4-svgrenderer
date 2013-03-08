@@ -55,26 +55,23 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
 
             this.render = function (){
 
-                        group = document.createElementNS("http://www.w3.org/2000/svg", "g")
-                        group.setAttribute("id",this.id+"assocgroup")
-                        group.setAttribute("transform","translate("
-                                                             +this.glob_x+
-                                                             ","
-                                                             +this.glob_y+
-                                                             ")")
-                        var assocline = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                        assocline.setAttribute("id", topic_id_1+" und "+topic_id_1)
-                        //assocline.setAttribute("d", "M "+"200"+" "+"200"+" l "+"300"+" "+"300");
-                        assocline.setAttribute("d", "M "+this.x1+" "+this.y1+" l "+(this.x2-this.x1)+" "+(this.y2-this.y1))
-
-
-                        assocline.setAttribute("stroke", "red");
-                        assocline.setAttribute("stroke-width", "3");
-                        assocline.setAttribute("fill", "none");
-                        group.appendChild(assocline)
-                        element.appendChild(group)
-
-            $(this.parent).append(element)
+                group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+                group.setAttribute("id",this.id+"assocgroup")
+                group.setAttribute("transform","translate("
+                                   +this.glob_x+
+                                   ","
+                                   +this.glob_y+
+                                   ")")
+                var assocline = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                assocline.setAttribute("id", topic_id_1+" und "+topic_id_1)
+                assocline.setAttribute("d", "M "+this.x1+" "+this.y1+" l "+(this.x2-this.x1)+" "+(this.y2-this.y1))
+                assocline.setAttribute("stroke", "red");
+                assocline.setAttribute("stroke-width", "3");
+                assocline.setAttribute("fill", "none");
+                group.appendChild(assocline)
+                element.appendChild(group)
+                $(this.parent).append(element)
+                this.connectAll()
             }
 
             this.is_player_topic = function(topic_id) {
@@ -96,4 +93,19 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                 }
 
 
+
+
+                this.connect = function(event, listener) {
+                	if (listener != null) {
+                   	    element.addEventListener(event, listener);
+                	}
+                }
+
+        this.connectAll = function() {
+           	this.connect("click", this.onclick);
+       	}
+
+        this.onclick = function(e){
+            dm4c.do_select_association(id)
+        }
     }

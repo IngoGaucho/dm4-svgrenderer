@@ -134,7 +134,7 @@
      }
 
     this.onmousedown = function(e) {
-        //$('#'+id+"text").text('dragstart')
+        dm4c.do_select_topic(id)
         dragON = true
         prevx = e.x
         prevy = e.y
