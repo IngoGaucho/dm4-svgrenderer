@@ -25,7 +25,7 @@
 
          //Create new DOM element
              var domelement = document.createElementNS("http://www.w3.org/2000/svg","svg")
-             domelement.setAttribute("id",this.dom_id)
+             domelement.setAttribute("id",this.id)
 
 
 
@@ -58,9 +58,11 @@
         }
 
         this.remove = function() {
-            // Note: all topic references are deleted already
-            delete topics[id]
-            reset_selection()
+            alert("#"+this.id)
+            $("#"+this.id).children().remove()
+            $("#"+this.id).empty()
+            $("#"+this.id).remove()
+
         }
 
         // ---
@@ -75,9 +77,13 @@
 
     this.render = function (){
         //Create group to contain all childs. this makes placing and transforming independent of the rest of the SVG
+
+
+        //if (document.getElementById(this.id) == false) { alert("bark") }
         group = document.createElementNS("http://www.w3.org/2000/svg", "g")
         //Named by convention :)
         group.setAttribute("id",this.id+"group")
+        domelement.appendChild(group)
         group.setAttribute("transform","translate("+this.getRealCoords().rx+","+this.getRealCoords().ry+")")
 
         //From this part on one could draw nian cats, the model would happily drag her
@@ -103,9 +109,9 @@
         group.appendChild(text)
 
         //now append this to our parent
-        domelement.appendChild(group)
         //and than everything to the canvas-dom
         $(this.parent).append(domelement)
+
     	this.connectAll();
     }
 

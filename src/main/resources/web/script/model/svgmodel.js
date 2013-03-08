@@ -89,9 +89,8 @@ function Svgmap(topicmap_id, config) {
 
         if (LOG_TOPICMAPS) dm4c.log("Moving topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id
             + " to x=" + x + ", y=" + y)
-        // update memory
-        // topic.move_to(x, y)
-        // update DB
+        // update assocs.
+
         var cas = this.get_associations(id)
         for (var i = 0, ca; ca = cas[i]; i++) {
             if(ca.topic_id_1 == topic.id){
@@ -104,6 +103,7 @@ function Svgmap(topicmap_id, config) {
             }
             this.update_association(ca)
         }
+        // update DB
         if (is_writable()) {
             dm4c.restc.move_topic(topicmap_id, id, x, y)
         }
@@ -242,13 +242,6 @@ function Svgmap(topicmap_id, config) {
         }
     }
 
-    this.draw_background = function(ctx) {
-        if (this.background_image) {
-            ctx.drawImage(this.background_image, 0, 0)
-        }
-    }
-
-
 
     // ----------------------------------------------------------------------------------------------- Private Functions
 
@@ -295,7 +288,6 @@ function Svgmap(topicmap_id, config) {
             var trans = info.get("dm4.topicmaps.state").get("dm4.topicmaps.translation")
             trans_x = trans.get("dm4.topicmaps.translation_x")
             trans_y = trans.get("dm4.topicmaps.translation_y")
-            alert(trans_x)
 
         }
 
@@ -307,6 +299,23 @@ function Svgmap(topicmap_id, config) {
             }
         }
     }
+
+    this.clear = function() {
+                // Must reset canvas translation.
+                // See TopicmapRenderer contract.
+                // Nope ;)
+                  alert("bark")
+
+                this.iterate_topics(function(topic) {
+                topic.remove()
+                })
+
+                this.iterate_associations(function(assoc) {
+                assoc.remove()
+                })
+
+
+            }
 
 
     // ---

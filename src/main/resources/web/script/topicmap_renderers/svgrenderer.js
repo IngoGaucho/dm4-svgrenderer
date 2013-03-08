@@ -5,10 +5,12 @@ function SvgRenderer(){
 
     js.extend(this, TopicmapRenderer)
     this.dom = $("<div>", {id: "canvas"})
+    var actual_map
 
     //Construct dom
-    var newtmap = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-    var dom_id
+    var svg_topicmap = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+    var dom_id = "Iamacoordinatesystemoriginsonobodyneedstostaple"
+    svg_topicmap.setAttribute("id",dom_id)
 
 
       // === TopicmapRenderer Implementation ===
@@ -25,26 +27,33 @@ function SvgRenderer(){
     // === TopicmapRenderer Topicmaps Extension ===
 
     this.load_topicmap = function(topicmap_id, config) {
-            return new Svgmap(topicmap_id, config)
+        if(actual_map){
+            actual_map.clear()
+        }
+        actual_map = new Svgmap(topicmap_id, config)
+        return actual_map
     }
 
     this.display_topicmap = function(topicmap, no_history_update) {
+        this.dom.append(svg_topicmap);
 
-        //First we need a "Mom" SVG element which has all visible elements as childs
-        dom_id = "#topicmap"+topicmap.get_id()
-        newtmap.setAttribute("id","topicmap"+topicmap.get_id())
-               dom_id2 = "topicmap"+topicmap.get_id()
- this.dom.append(newtmap);
         //Now append all Topics as childs
         display_topics()
         display_associations()
         this.connectAll()
-        //then append the whole construct
-        this.dom.append(newtmap);
+
+        function clear_dom(dom){
+            while (dom.lastChild) {
+                dom.removeChild(dom.lastChild);
+            }
+        }
+
+
+
 
         function display_topics() {
             topicmap.iterate_topics(function(topic) {
-            topic.parent = dom_id
+            topic.parent = "#"+dom_id
             topic.render()
             })
         }
@@ -53,7 +62,7 @@ function SvgRenderer(){
 
         function display_associations() {
             topicmap.iterate_associations(function(assoc) {
-                assoc.parent = dom_id
+                assoc.parent = "#"+dom_id
                 assoc.render()
             })
         }
@@ -98,11 +107,6 @@ function SvgRenderer(){
 
             this.close_context_menu = function() {}
 
-            // === Grid Positioning ===
-
-            this.start_grid_positioning = function() {}
-
-            this.stop_grid_positioning = function() {}
 
 
 
@@ -123,7 +127,7 @@ function SvgRenderer(){
 
     this.connect = function(event, listener) {
        	if (listener != null) {
-     	    newtmap.addEventListener(event, listener);
+     	    svg_topicmap.addEventListener(event, listener);
        	}
     }
 
@@ -168,7 +172,8 @@ function SvgRenderer(){
               }
     }
     this.onmousedown = function(e) {
-            if (e.target == document.getElementById(dom_id2)){
+
+            if (e.target == document.getElementById(dom_id)){
                 drag = true
                 prevx = e.x
                 prevy = e.y
