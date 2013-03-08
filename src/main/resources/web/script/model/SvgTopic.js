@@ -80,7 +80,7 @@
 
 
         //if (document.getElementById(this.id) == false) { alert("bark") }
-        group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+        var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
         //Named by convention :)
         group.setAttribute("id",this.id+"group")
         domelement.appendChild(group)
@@ -90,13 +90,39 @@
         //over screen :)
         //function generate-svg() return SVG-Element
 
+        var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
+        var radGrad = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient")
+        radGrad.setAttribute("id","grad1")
+        radGrad.setAttribute("cx","50%")
+        radGrad.setAttribute("cy","50%")
+        radGrad.setAttribute("r","50%")
+        radGrad.setAttribute("fx","50%")
+        radGrad.setAttribute("fy","50%")
+        var stop = document.createElementNS("http://www.w3.org/2000/svg", "stop")
+        stop.setAttribute("offset","0%")
+        stop.setAttribute("style","stop-color:rgb(0,0,255);stop-opacity:1")
+        radGrad.appendChild(stop)
+        stop = document.createElementNS("http://www.w3.org/2000/svg", "stop")
+        stop.setAttribute("offset","80%")
+        stop.setAttribute("style","stop-color:rgb(0,171,255);stop-opacity:0.49")
+        radGrad.appendChild(stop)
+        stop = document.createElementNS("http://www.w3.org/2000/svg", "stop")
+        stop.setAttribute("offset","100%")
+        stop.setAttribute("style","stop-color:rgb(255,255,255);stop-opacity:0")
+        radGrad.appendChild(stop)
+
+
+        defs.appendChild(radGrad)
+        group.appendChild(defs)
+
         //For now we do with a blue ball
         var ball = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         ball.setAttribute("id",this.id+"ball")
         ball.setAttribute("cx", 0);
         ball.setAttribute("cy", 0);
         ball.setAttribute("r", "20");
-        ball.setAttribute("fill", "#336699");
+        ball.setAttribute("fill","url(#grad1)");
+        //ball.setAttribute("stroke","none");
         group.appendChild(ball)
 
         //And a Text with the topics value
@@ -126,7 +152,7 @@
     this.connectAll = function() {
     	this.connect("click", this.onclick);
         //this.connect("dblclick", this.ondblclick);
-        //this.connect("mouseover", this.onmouseover);
+        this.connect("contextmenu", this.contextmenu);
         this.connect("mouseout", this.onmouseout);
         this.connect("mousedown", this.onmousedown);
         this.connect("mouseup", this.onmouseup);
@@ -139,6 +165,11 @@
         prevx = e.x
         prevy = e.y
     }
+
+    this.contextmenu = function(e) {
+          e.preventDefault()
+
+        }
 
     this.onmousemove = function(e) {
          if (dragON) {
@@ -159,6 +190,7 @@
     }
 
     this.onmouseup = function(e) {
+
         dragOFF()
     }
 
