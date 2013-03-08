@@ -70,7 +70,7 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                 assocline.setAttribute("fill", "none");
                 group.appendChild(assocline)
                 element.appendChild(group)
-                $(this.parent).append(element)
+                $(this.parent).prepend(element)
                 this.connectAll()
             }
 

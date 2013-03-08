@@ -37,7 +37,6 @@ function SvgRenderer(){
     this.display_topicmap = function(topicmap, no_history_update) {
         this.dom.append(svg_topicmap);
 
-        //Now append all Topics as childs
         display_topics()
         display_associations()
         this.connectAll()
