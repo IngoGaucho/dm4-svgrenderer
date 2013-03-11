@@ -118,7 +118,7 @@ function SvgRenderer(){
     this.add_topic = function(topic, do_select) {
         topic.x = 0
         topic.y = 0
-        actual_map.add_topic(topic.id, topic.type_uri, "new", topic.x , topic.y, "#"+dom_id)
+        actual_map.add_topic(topic.id, topic.type_uri, topic.value, topic.x , topic.y, "#"+dom_id)
         return topic
     }
 
