@@ -4,6 +4,7 @@ function ringmenu(x, y, parent) {
     this.x = x
     this.y = y
     this.parent = parent
+    this.id = "contextmenu"
 
     var domelement = document.createElementNS("http://www.w3.org/2000/svg","svg")
     domelement.setAttribute("id",this.id)
@@ -32,6 +33,10 @@ function ringmenu(x, y, parent) {
         ball.setAttribute("cy", 0);
         ball.setAttribute("r", "40");
         ball.setAttribute("fill","black");
+        ball.setAttribute("stroke","none");
+        group.appendChild(ball)
+        $(this.parent).append(domelement)
+
     }
 
 }

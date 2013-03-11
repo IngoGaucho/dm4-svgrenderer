@@ -145,7 +145,7 @@ function SvgRenderer(){
 
     this.connect = function(event, listener) {
        	if (listener != null) {
-     	    svg_topicmap.addEventListener(event, listener);
+     	    this.dom.bind(event, listener);
        	}
     }
 
@@ -153,6 +153,7 @@ function SvgRenderer(){
        	//this.connect("click", this.onclick);
         //this.connect("dblclick", this.ondblclick);
         //this.connect("mouseover", this.onmouseover);
+        this.connect("contextmenu", this.contextmenu);
         this.connect("mouseout", this.onmouseout);
         this.connect("mousedown", this.onmousedown);
         this.connect("mouseup", this.onmouseup);
@@ -198,5 +199,10 @@ function SvgRenderer(){
             }
         }
 
+    this.contextmenu = function(e) {
+        e.preventDefault()
 
+        var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id)
+        menu.render()
+    }
 }
