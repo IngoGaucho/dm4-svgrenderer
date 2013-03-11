@@ -54,7 +54,6 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
 
 
             this.render = function (){
-
                 group = document.createElementNS("http://www.w3.org/2000/svg", "g")
                 group.setAttribute("id",this.id+"assocgroup")
                 group.setAttribute("transform","translate("
