@@ -122,6 +122,20 @@ function SvgRenderer(){
         return topic
     }
 
+    this.add_association = function(assoc, do_select) {
+            // update model
+
+            if (!actual_map.is_assoc_on_map(assoc.id)) {
+
+                actual_map.add_association(assoc.id, assoc.type_uri, assoc.role_1.topic_id, assoc.role_2.topic_id,"#"+dom_id)
+
+            }
+            //
+            if (do_select) {
+    //            model.set_highlight_association(assoc.id)
+            }
+    }
+
         this.update_topic = function(topic, refresh_canvas) {
 
 

@@ -7,6 +7,7 @@ dm4c.load_script("/de.deepamehta.svgrenderer/script/topicrenderer/assocrenderer.
 dm4c.load_script("/de.deepamehta.svgrenderer/script/model/svgmodel.js")
 dm4c.load_script("/de.deepamehta.svgrenderer/script/model/SvgTopic.js")
 dm4c.load_script("/de.deepamehta.svgrenderer/script/model/svgassociation.js")
+dm4c.load_script("/de.deepamehta.svgrenderer/script/model/ringmenu.js")
 
 
 //Modell

@@ -3,7 +3,7 @@
 
         this.id = id
         this.type_uri = type_uri
-        this.value = value      // ### FIXME: rename to "value"
+        this.value = value
         this.x = x
         this.y = y
         this.visibility = visibility
@@ -19,8 +19,7 @@
         var dx = 0
         var dy = 0
         var TrueCoords = null;
-        var cx = this.x
-        var cy = this.y
+
         //
 
          //Create new DOM element
