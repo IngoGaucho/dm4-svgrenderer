@@ -208,6 +208,13 @@
 
     }
 
+    this.contextmenu = function(e) {
+            e.preventDefault()
+
+            var menu = new ringmenu(self.getRealCoords().rx, self.getRealCoords().ry, self.parent, self.id)
+            menu.render()
+        }
+
     this.setParent = function(dom){
        this.parent = dom
     }

@@ -181,6 +181,7 @@ function SvgRenderer(){
 
 
     this.onmousemove = function(e) {
+       if (e.target == document.getElementById(dom_id)){
              if (drag) {
                  cx = (e.x-prevx)
                  cy = (e.y-prevy)
@@ -189,6 +190,7 @@ function SvgRenderer(){
                  dm4c.fire_event("post_move_canvas", cx, cy)
 
               }
+        }
     }
     this.onmousedown = function(e) {
 
@@ -201,8 +203,9 @@ function SvgRenderer(){
 
     this.contextmenu = function(e) {
         e.preventDefault()
-
-        var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id)
-        menu.render()
+        if (e.target == document.getElementById(dom_id)){
+            var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id)
+            menu.render()
+        }
     }
 }
