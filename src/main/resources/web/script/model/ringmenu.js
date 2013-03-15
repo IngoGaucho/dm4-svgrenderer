@@ -12,7 +12,7 @@ function ringmenu(x, y, parent, topic_id) {
     domelement.setAttribute("id",this.id)
 
     var items = generate_items()
-
+    var elements = {}
 
 
     function generate_items(){
@@ -38,12 +38,14 @@ function ringmenu(x, y, parent, topic_id) {
         //over screen :)
         //TODO: this shoulb be a function generate-svg() return SVG-Element
         var beta = 2*Math.PI/items.length
-                    var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
-            group.appendChild(defs)
+
+        var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
+        group.appendChild(defs)
 
         for (var i=0,len=items.length; i<len; i++){
             var alpha = i*beta
-            render_item(alpha, beta, items[i])
+            elements[items[i]] = new menu_item(alpha, beta, items[i], group, defs)
+            elements[items[i]].render_item()
         }
 
         //group.appendChild(render_item())
@@ -51,54 +53,65 @@ function ringmenu(x, y, parent, topic_id) {
         $(this.parent).append(domelement)
         this.connectAll()
 
-        function render_item(alpha, beta, name){
-            var piecentext = document.createElementNS("http://www.w3.org/2000/svg", "g")
-            var piece = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            piecentext.setAttribute("id",name)
-            piece.setAttribute("d",
-                "M "+Math.cos(alpha+0.2)*30+", "+(-1)*Math.sin(alpha+0.2)*30+ //start lower inner circle
-                " A"+30+","+30+    //radius 30 degrees
-                    " "+0+         //non-fancy flag
-                    " "+0+","+0+  //short-arc, counterclockwise
-                    " "+Math.cos(alpha+beta-0.2)*30+","+(-1)*Math.sin(alpha+beta-0.2)*30+ //arc target
-                " L"+Math.cos(alpha+beta-0.2)*80+","+(-1)*Math.sin(alpha+beta-0.2)*80+  //go to upper circle
-                " A"+80+","+80+    //radius 50 degrees
-                    " "+0+         //non-fancy flag
-                    " "+0+","+1+  //short-arc, counterclockwise
-                    " "+Math.cos(alpha+0.2)*80+","+(-1)*Math.sin(alpha+0.2)*80+ //arc target
-                 " z" //close
-            )
-            piece.setAttribute("stroke", "black");
-            piece.setAttribute("stroke-width", "1");
-            piece.setAttribute("style", "fill:blue");
 
-            var textcurve = document.createElementNS("http://www.w3.org/2000/svg", "path")
-            textcurve.setAttribute("id",i)
-            textcurve.setAttribute("d",
-                                    "M "+Math.cos(alpha)*50+", "+(-1)*Math.sin(alpha)*50+ //start lower inner circle
-                                    " A"+50+","+50+    //radius 30 degrees
-                                        " "+0+         //non-fancy flag
-                                        " "+0+","+0+  //short-arc, counterclockwise
-                                        " "+Math.cos(alpha+beta)*50+","+(-1)*Math.sin(alpha+beta)*50 //arc target
-                                    )
-            defs.appendChild(textcurve);
-
-            var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
-            text.setAttribute("fill", "red");
-            var textpath = document.createElementNS("http://www.w3.org/2000/svg", "textPath")
-            //textpath.setAttribute("xlink:href", name);
-            textpath.setAttributeNS("http://www.w3.org/1999/xlink", "href", "#"+i);
-            textpath.appendChild(document.createTextNode(name))
-            text.appendChild(textpath)
-            piecentext.appendChild(piece)
-            piecentext.appendChild(text)
-            group.appendChild(piecentext)
-        }
     }
 
     //menue items modell
 
+    function menu_item(alpha, beta, name, group, defs){
 
+        this.name = name
+
+        this.click = function(){
+            alert(this.name)
+        }
+
+        this.render_item = function (){
+                var piecentext = document.createElementNS("http://www.w3.org/2000/svg", "g")
+                var piece = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                piecentext.setAttribute("id",name)
+                piece.setAttribute("d",
+                    "M "+Math.cos(alpha+0.2)*30+", "+(-1)*Math.sin(alpha+0.2)*30+ //start lower inner circle
+                    " A"+30+","+30+    //radius 30 degrees
+                        " "+0+         //non-fancy flag
+                        " "+0+","+0+  //short-arc, counterclockwise
+                        " "+Math.cos(alpha+beta-0.2)*30+","+(-1)*Math.sin(alpha+beta-0.2)*30+ //arc target
+                    " L"+Math.cos(alpha+beta-0.2)*80+","+(-1)*Math.sin(alpha+beta-0.2)*80+  //go to upper circle
+                    " A"+80+","+80+    //radius 50 degrees
+                        " "+0+         //non-fancy flag
+                        " "+0+","+1+  //short-arc, counterclockwise
+                        " "+Math.cos(alpha+0.2)*80+","+(-1)*Math.sin(alpha+0.2)*80+ //arc target
+                     " z" //close
+                )
+                piece.setAttribute("stroke", "black");
+                piece.setAttribute("stroke-width", "1");
+                piece.setAttribute("style", "fill:blue");
+
+                var textcurve = document.createElementNS("http://www.w3.org/2000/svg", "path")
+                textcurve.setAttribute("id","def_"+name)
+                textcurve.setAttribute("d",
+                                        "M "+Math.cos(alpha)*50+", "+(-1)*Math.sin(alpha)*50+ //start lower inner circle
+                                        " A"+50+","+50+    //radius 30 degrees
+                                            " "+0+         //non-fancy flag
+                                            " "+0+","+0+  //short-arc, counterclockwise
+                                            " "+Math.cos(alpha+beta)*50+","+(-1)*Math.sin(alpha+beta)*50 //arc target
+                                        )
+                defs.appendChild(textcurve);
+
+                var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
+                text.setAttribute("fill", "red");
+                text.setAttribute("id",name)
+                var textpath = document.createElementNS("http://www.w3.org/2000/svg", "textPath")
+                //textpath.setAttribute("xlink:href", name);
+                textpath.setAttributeNS("http://www.w3.org/1999/xlink", "href", "#def_"+name);
+                textpath.appendChild(document.createTextNode(name))
+                text.appendChild(textpath)
+                piecentext.appendChild(piece)
+                piecentext.appendChild(text)
+                group.appendChild(piecentext)
+            }
+
+    }
 
     //== Eventhandling Helper Functions
 
@@ -127,12 +140,16 @@ function ringmenu(x, y, parent, topic_id) {
 
     }
 
-       this.onmousedown =function(e){
+    this.onmousedown =function(e){
+        alert($(e.target).parent().attr("id"))
+        execute_target_click($(e.target).parent().attr("id"))
+    }
 
-            alert("click: "+e.target.id)
-
-       }
-
-
+    function execute_target_click(id){
+          for (var i=0,len=items.length; i<len; i++){
+            if (items[i]==id) elements[items[i]].click()
+          }
+    }
 
 }
+

@@ -380,6 +380,17 @@ function Svgmap(topicmap_id, config) {
         }
 
     }
+   var ta
+   this.render_tmp_assoc = function(x1,y1,x2,y2, parent){
+        if(ta) ta.remove()
+        ta = new SvgAssociation("tmp_assoc", null, null, null, x1, y1 ,x2, y2, 0, 0)
+        ta.parent = parent
+        ta.render()
+   }
+
+   this.delete_tmp_assoc = function() {
+        ta.remove()
+   }
     //--
 
     this.get_associations = function(topic_id) {

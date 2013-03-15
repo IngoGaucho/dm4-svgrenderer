@@ -167,37 +167,57 @@ function SvgRenderer(){
     var cx = 0
     var cy = 0
     var prevx, prevy
-
+    var assoc_draw = false
     function dragEnd(){
         drag = false
     }
     this.onmouseout = function(e) {
-            if(drag){dragEnd()}
+        if (e.target == document.getElementById(dom_id)){
+            drag = false
+            //#FIXME: We need assoc_draw = false, but this event fires on entering assocs doms for example
+            // Now we have the bug that assoc drawing doesnt end on leaving topicmap
+        }
     }
 
     this.onmouseup = function(e) {
-        if(drag){dragEnd()}
+        drag = false
+        if(assoc_draw){
+            assoc_draw = false
+            actual_map.delete_tmp_assoc()
+            if($("#"+e.target.id).parent().parent().attr("id")){
+                var topic = dm4c.fetch_topic($("#"+e.target.id).parent().parent().attr("id"))
+                dm4c.do_create_association("dm4.core.association", topic)
+
+            }
+        }
     }
 
 
     this.onmousemove = function(e) {
        if (e.target == document.getElementById(dom_id)){
              if (drag) {
-                 cx = (e.x-prevx)
-                 cy = (e.y-prevy)
-                 prevx = e.x
-                 prevy = e.y
+                 cx = (e.offsetX-prevx)
+                 cy = (e.offsetY-prevy)
+                 prevx = e.offsetX
+                 prevy = e.offsetY
                  dm4c.fire_event("post_move_canvas", cx, cy)
-
-              }
-        }
+             } else if (assoc_draw){
+                draw_temp_assoc(e.offsetX, e.offsetY, prevx, prevy)
+             }
+       }
     }
     this.onmousedown = function(e) {
-
-            if (e.target == document.getElementById(dom_id)){
+            $("#contextmenu").remove()
+            prevx = e.offsetX
+            prevy = e.offsetY
+            if (e.target == document.getElementById(dom_id) && !e.shiftKey){
                 drag = true
-                prevx = e.x
-                prevy = e.y
+                prevx = e.offsetX
+                prevy = e.offsetY
+            }else if(e.target != document.getElementById(dom_id) && e.shiftKey){
+                //alert(e.offsetY)
+                draw_temp_assoc(e.offsetX, e.offsetY, prevx, prevy)
+                assoc_draw = true
             }
         }
 
@@ -207,5 +227,11 @@ function SvgRenderer(){
             var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id)
             menu.render()
         }
+    }
+
+
+    function draw_temp_assoc(x1,y1,x2,y2){
+        actual_map.render_tmp_assoc(x1,y1,x2,y2,"#"+dom_id)
+
     }
 }

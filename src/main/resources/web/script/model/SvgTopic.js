@@ -160,7 +160,7 @@
 
     this.onmousedown = function(e) {
         dm4c.do_select_topic(id)
-        dragON = true
+        if(!e.shiftKey) dragON = true
         prevx = e.x
         prevy = e.y
     }
@@ -189,7 +189,6 @@
     }
 
     this.onmouseup = function(e) {
-
         dragOFF()
     }
 
