@@ -194,6 +194,12 @@ function SvgRenderer(){
         }
         if($("#contextmenu").length==1){
                         $("#contextmenu").remove()
+                        if ($(e.target).parent().attr("id")=="hide") actual_map.hide(source_id)
+                        if ($(e.target).parent().attr("id")=="Web"){
+                            dm4c.create_topic
+                                 dm4c.fire_event("post_show_topic", new SvgTopic(id, type_uri, value, self.x, self.y, visibility))
+                        }
+                        //if ($(e.target).parent().attr("id")=="delete") actual_map.delete_item(source_id)
                         if ($(e.target).parent().attr("id")=="associate"){
                             start_assoc(e.offsetX,e.offsetY)
                         }
@@ -216,8 +222,9 @@ function SvgRenderer(){
        }
     }
     this.onmousedown = function(e) {
-            if (e.target == document.getElementById(dom_id) && !e.shiftKey){
+            if (e.target == document.getElementById(dom_id) && !e.shiftKey && e.button == 0){
                 drag = true
+                if($("#contextmenu").length==1) $("#contextmenu").remove()
                 prevx = e.offsetX
                 prevy = e.offsetY
             }else if(e.target != document.getElementById(dom_id) && e.shiftKey){
@@ -234,9 +241,14 @@ function SvgRenderer(){
 
     this.contextmenu = function(e) {
         e.preventDefault()
+
+
         if (e.target == document.getElementById(dom_id)){
-            var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id)
+            if($("#contextmenu").length==1) $("#contextmenu").remove()
+            var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id, ["Institution", "Note", "Person", "Web"])
             menu.render()
+        }else{
+           source_id = dm4c.selected_object.id
         }
     }
 

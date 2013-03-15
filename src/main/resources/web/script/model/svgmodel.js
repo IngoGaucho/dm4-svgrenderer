@@ -1,6 +1,6 @@
 /**
  * A topicmap model that is attached to the database. There are methods for:
- *  - loading a topicmap from DB
+ *  - ing a topicmap from DB
  *  - manipulating the topicmap by e.g. adding/removing topics and associations
  *
  *  SVG specific model derived from the default model
@@ -46,7 +46,8 @@ function Svgmap(topicmap_id, config) {
     }
 
     this.add_topic = function(id, type_uri, value, x, y, parent) {
-        if (!topics[id]) {
+        var topic = topics[id]
+        if (!topic) {
             if (LOG_TOPICMAPS) dm4c.log("Adding topic " + id + " (\"" + value + "\") to topicmap " + topicmap_id)
             // update memory
             topics[id] = new SvgTopic(id, type_uri, value, x, y, true, trans_x, trans_y)     // visibility=true
@@ -57,16 +58,16 @@ function Svgmap(topicmap_id, config) {
             if (is_writable()) {
                 dm4c.restc.add_topic_to_topicmap(topicmap_id, id, x, y)
             }
-        }/* else if (!topic.visibility) {
+        } else if (!topic.visibility) {
             if (LOG_TOPICMAPS)
                 dm4c.log("Showing topic " + id + " (\"" + topic.value + "\") on topicmap " + topicmap_id)
             // update memory
-            topic.render()
+            topic.show()
             // update DB
             if (is_writable()) {
                 dm4c.restc.set_topic_visibility(topicmap_id, id, true)
             }
-        } */else {
+        } else {
             if (LOG_TOPICMAPS)
                 dm4c.log("Topic " + id + " (\"" + value + "\") already visible in topicmap " + topicmap_id)
         }
@@ -133,15 +134,25 @@ function Svgmap(topicmap_id, config) {
         }
     }
 
-    this.hide_topic = function(id) {
+    this.hide = function(id) {
         var topic = topics[id]
-        if (LOG_TOPICMAPS) dm4c.log("Hiding topic " + id + " (\"" + topic.value + "\") from topicmap " + topicmap_id)
+        var assoc = assocs[id]
+
+        if (LOG_TOPICMAPS) dm4c.log("Hiding assoc/topic " + id +" from topicmap " + topicmap_id)
         // update memory
-        topic.hide()
-        // update DB
-        if (is_writable()) {
-            dm4c.restc.set_topic_visibility(topicmap_id, id, false)
+        if (topic){
+            topic.hide()
+            var cas = this.get_associations(id)
+            for (var i = 0, ca; ca = cas[i]; i++) {
+               this.hide_association(ca.id)
+            }
+          if (is_writable()) {
+                dm4c.restc.set_topic_visibility(topicmap_id, id, false)
+            }
+        } else if (assoc) {
+            this.hide_association(assoc.id)
         }
+
     }
 
     this.hide_association = function(id) {
@@ -150,6 +161,8 @@ function Svgmap(topicmap_id, config) {
         // update memory
         assoc.hide()
         // update DB
+        delete assocs[id]
+
         if (is_writable()) {
             dm4c.restc.remove_association_from_topicmap(topicmap_id, id)
         }
@@ -166,7 +179,7 @@ function Svgmap(topicmap_id, config) {
         t.remove()
         t.value = topic.value
         topics[topic.id].value = topic.value
-        //#TODO there is a more legant way
+        //#TODO there is a more elegant way
         t.render()
 
         }
@@ -184,20 +197,40 @@ function Svgmap(topicmap_id, config) {
             a.remove()
             if(assoc.x1) assocs[assoc.id] = assoc
             else{
-            assocs[assoc.id].type_uri = assoc.type_uri
-            assoc = assocs[assoc.id]
+                assocs[assoc.id].type_uri = assoc.type_uri
+                assoc = assocs[assoc.id]
             }
             assoc.render()
 
         }
     }
 
+    this.delete_item = function(id) {
+        var topic = topics[id]
+        var assoc = assocs[id]
+
+        if (LOG_TOPICMAPS) dm4c.log("Hiding assoc/topic " + id +" from topicmap " + topicmap_id)
+        // update memory
+        if (topic){
+                dm4c.fire_event("post_delete_topic", topic)
+        } else if (assoc){
+                dm4c.fire_event("post_delete_association", assoc)
+        }
+
+    }
     this.delete_topic = function(id) {
         var topic = topics[id]
+                    alert(id)
+
         if (topic) {
             if (LOG_TOPICMAPS) dm4c.log("..... Deleting topic " + id + " (\"" + topic.value + "\") from topicmap " +
                 topicmap_id)
             topic.remove()
+            delete topics[id]
+            var cas = this.get_associations(id)
+            for (var i = 0, ca; ca = cas[i]; i++) {
+                this.delete_association(ca.id)
+            }
         }
     }
 
@@ -206,6 +239,7 @@ function Svgmap(topicmap_id, config) {
         if (assoc) {
             if (LOG_TOPICMAPS) dm4c.log("..... Deleting association " + id + " from topicmap " + topicmap_id)
             assoc.remove()
+            delete assocs[id]
         }
     }
 
@@ -300,6 +334,7 @@ function Svgmap(topicmap_id, config) {
                 var visibility = topic.visualization["dm4.topicmaps.visibility"].value
                 if (LOG_TOPICMAPS) dm4c.log(".......... ID " + topic.id + ": type_uri=\"" + topic.type_uri +
                     "\", value=\"" + topic.value + "\", x=" + x + ", y=" + y + ", visibility=" + visibility)
+
                 topics[topic.id] = new SvgTopic(topic.id, topic.type_uri, topic.value, x, y, visibility, trans_x, trans_y)
             }
         }

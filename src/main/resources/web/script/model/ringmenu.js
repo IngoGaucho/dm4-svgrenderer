@@ -1,9 +1,8 @@
-function ringmenu(x, y, parent, topic_id) {
+function ringmenu(x, y, parent, items) {
 
 //how to svg: arc, coords von kreis fkt
     this.x = x
     this.y = y
-    this.topic_id = topic_id
     this.parent = parent
     this.id = "contextmenu"
     var self = this
@@ -11,20 +10,13 @@ function ringmenu(x, y, parent, topic_id) {
     var domelement = document.createElementNS("http://www.w3.org/2000/svg","svg")
     domelement.setAttribute("id",this.id)
 
-    var items = generate_items()
     var elements = {}
 
-
-    function generate_items(){
-               if (self.topic_id) return ["Edit","delete","associate","retype","hyde"]
-               return ["Institution", "Note", "Person", "Web"]
-    }
-
-     this.remove = function() {
+    this.remove = function() {
        $("#"+this.id).children().remove()
        $("#"+this.id).empty()
        $("#"+this.id).remove()
-     }
+    }
 
     this.render = function(){
         var group = document.createElementNS("http://www.w3.org/2000/svg", "g")

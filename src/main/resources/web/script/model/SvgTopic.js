@@ -31,10 +31,12 @@
 
         this.show = function() {
             this.visibility = true
+            this.render()
         }
 
         this.hide = function() {
             this.visibility = false
+            this.remove()
             reset_selection()
         }
 
@@ -53,15 +55,13 @@
          * @param   topic   a Topic object
          */
         this.update = function(topic) {
-            //this.value = topic.value
+            this.value = topic.value
         }
 
         this.remove = function() {
-            alert("#"+this.id)
             $("#"+this.id).children().remove()
             $("#"+this.id).empty()
             $("#"+this.id).remove()
-
         }
 
         // ---
@@ -77,7 +77,7 @@
     this.render = function (){
         //Create group to contain all childs. this makes placing and transforming independent of the rest of the SVG
 
-
+        if(this.visibility){
         //if (document.getElementById(this.id) == false) { alert("bark") }
         var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
         //Named by convention :)
@@ -138,6 +138,7 @@
         $(this.parent).append(domelement)
 
     	this.connectAll();
+    	}
     }
 
     //Eventhandling Helper Functions
@@ -160,15 +161,10 @@
 
     this.onmousedown = function(e) {
         dm4c.do_select_topic(id)
-        if(!e.shiftKey) dragON = true
+        if(e.button == 0 && !e.shiftKey) dragON = true
         prevx = e.x
         prevy = e.y
     }
-
-    this.contextmenu = function(e) {
-          e.preventDefault()
-
-        }
 
     this.onmousemove = function(e) {
          if (dragON) {
@@ -209,8 +205,9 @@
 
     this.contextmenu = function(e) {
             e.preventDefault()
+                    if($("#contextmenu").length==1) $("#contextmenu").remove()
 
-            var menu = new ringmenu(self.getRealCoords().rx, self.getRealCoords().ry, self.parent, self.id)
+            var menu = new ringmenu(self.getRealCoords().rx, self.getRealCoords().ry, self.parent, ["Edit","associate","retype","hide"])
             menu.render()
         }
 

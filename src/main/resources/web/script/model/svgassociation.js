@@ -1,5 +1,6 @@
 function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, glob_x, glob_y) {
 
+        var self = this
         this.id = id
         this.type_uri = type_uri
         this.topic_id_1 = topic_id_1
@@ -18,7 +19,7 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
         element.setAttribute('id',this.id)
 
         this.hide = function() {
-            delete assocs[id]
+            this.remove()
             reset_selection()
         }
 
@@ -101,10 +102,20 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                 }
 
         this.connectAll = function() {
-           	this.connect("click", this.onclick);
+           	this.connect("mousedown", this.mousedown);
+           	this.connect("contextmenu", this.contextmenu);
        	}
 
-        this.onclick = function(e){
+        this.mousedown = function(e){
             dm4c.do_select_association(id)
         }
+
+         this.contextmenu = function(e) {
+                    e.preventDefault()
+
+                    if($("#contextmenu").length==1) $("#contextmenu").remove()
+
+                    var menu = new ringmenu(e.offsetX, e.offsetY, self.parent, ["Edit","hide"])
+                    menu.render()
+                }
     }
