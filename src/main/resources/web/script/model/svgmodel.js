@@ -381,9 +381,9 @@ function Svgmap(topicmap_id, config) {
 
     }
    var ta
-   this.render_tmp_assoc = function(x1,y1,x2,y2, parent){
+   this.render_tmp_assoc = function(start_id,x,y, parent){
         if(ta) ta.remove()
-        ta = new SvgAssociation("tmp_assoc", null, null, null, x1, y1 ,x2, y2, 0, 0)
+        ta = new SvgAssociation("tmp_assoc", null, null, null, topics[start_id].getRealCoords().rx, topics[start_id].getRealCoords().ry ,x, y, 0, 0)
         ta.parent = parent
         ta.render()
    }

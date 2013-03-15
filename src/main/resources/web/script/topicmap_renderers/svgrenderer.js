@@ -27,9 +27,8 @@ function SvgRenderer(){
     // === TopicmapRenderer Topicmaps Extension ===
 
     this.load_topicmap = function(topicmap_id, config) {
-        if(actual_map){
-            actual_map.clear()
-        }
+        if($("#contextmenu").length==1) $("#contextmenu").remove()
+        if(actual_map) actual_map.clear()
         actual_map = new Svgmap(topicmap_id, config)
         return actual_map
     }
@@ -168,6 +167,8 @@ function SvgRenderer(){
     var cy = 0
     var prevx, prevy
     var assoc_draw = false
+    var source_id
+
     function dragEnd(){
         drag = false
     }
@@ -180,6 +181,7 @@ function SvgRenderer(){
     }
 
     this.onmouseup = function(e) {
+        if(e.button == 0){
         drag = false
         if(assoc_draw){
             assoc_draw = false
@@ -189,6 +191,13 @@ function SvgRenderer(){
                 dm4c.do_create_association("dm4.core.association", topic)
 
             }
+        }
+        if($("#contextmenu").length==1){
+                        $("#contextmenu").remove()
+                        if ($(e.target).parent().attr("id")=="associate"){
+                            start_assoc(e.offsetX,e.offsetY)
+                        }
+        }
         }
     }
 
@@ -202,24 +211,26 @@ function SvgRenderer(){
                  prevy = e.offsetY
                  dm4c.fire_event("post_move_canvas", cx, cy)
              } else if (assoc_draw){
-                draw_temp_assoc(e.offsetX, e.offsetY, prevx, prevy)
+                draw_temp_assoc(source_id, e.offsetX, e.offsetY)
              }
        }
     }
     this.onmousedown = function(e) {
-            $("#contextmenu").remove()
-            prevx = e.offsetX
-            prevy = e.offsetY
             if (e.target == document.getElementById(dom_id) && !e.shiftKey){
                 drag = true
                 prevx = e.offsetX
                 prevy = e.offsetY
             }else if(e.target != document.getElementById(dom_id) && e.shiftKey){
                 //alert(e.offsetY)
-                draw_temp_assoc(e.offsetX, e.offsetY, prevx, prevy)
-                assoc_draw = true
+                start_assoc(e.offsetX, e.offsetY)
             }
         }
+
+    function start_assoc(x,y){
+        source_id = dm4c.selected_object.id
+        draw_temp_assoc(source_id, x, y)
+        assoc_draw = true
+    }
 
     this.contextmenu = function(e) {
         e.preventDefault()
@@ -230,8 +241,8 @@ function SvgRenderer(){
     }
 
 
-    function draw_temp_assoc(x1,y1,x2,y2){
-        actual_map.render_tmp_assoc(x1,y1,x2,y2,"#"+dom_id)
+    function draw_temp_assoc(start_id,x2,y2){
+        actual_map.render_tmp_assoc(start_id,x2,y2,"#"+dom_id)
 
     }
 }

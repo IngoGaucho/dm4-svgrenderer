@@ -12,31 +12,9 @@ dm4c.load_script("/de.deepamehta.svgrenderer/script/model/ringmenu.js")
 
 //Modell
 
-var svg_renderers = {}
  // === Topicmaps Listeners ===
-   dm4c.add_listener("init", function() {
-
-    function register_topicmap_renderers() {
-                // default renderer
-                // custom renderers
-                var renderers = dm4c.fire_event("topicmap_renderer")
-                renderers.forEach(function(renderer) {
-                    if(renderer.uri == "dm4.svgrenderer.svg_renderer"){
-                        register(renderer)
-                    }
-                })
-
-
-                function register(renderer) {
-                    svg_renderer[renderer.get_info().uri] = renderer
-                }
-            }
-            })
 
     dm4c.add_listener("topicmap_renderer", function() {
         return new SvgRenderer()
     })
-
-
-
 })

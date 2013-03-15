@@ -16,7 +16,7 @@ function ringmenu(x, y, parent, topic_id) {
 
 
     function generate_items(){
-               if (self.topic_id) return ["Edit","delete","retype","hyde"]
+               if (self.topic_id) return ["Edit","delete","associate","retype","hyde"]
                return ["Institution", "Note", "Person", "Web"]
     }
 
@@ -63,7 +63,6 @@ function ringmenu(x, y, parent, topic_id) {
         this.name = name
 
         this.click = function(){
-            alert(this.name)
         }
 
         this.render_item = function (){
@@ -141,7 +140,6 @@ function ringmenu(x, y, parent, topic_id) {
     }
 
     this.onmousedown =function(e){
-        alert($(e.target).parent().attr("id"))
         execute_target_click($(e.target).parent().attr("id"))
     }
 
