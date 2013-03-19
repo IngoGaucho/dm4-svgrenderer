@@ -114,8 +114,9 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                     e.preventDefault()
 
                     if($("#contextmenu").length==1) $("#contextmenu").remove()
+                    var commands = dm4c.get_association_commands(dm4c.selected_object, "context-menu")
 
-                    var menu = new ringmenu(e.offsetX, e.offsetY, self.parent, ["Edit","hide"])
+                    var menu = new ringmenu(e.offsetX, e.offsetY, self.parent, commands)
                     menu.render()
                 }
     }

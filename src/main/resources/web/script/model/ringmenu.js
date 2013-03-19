@@ -1,4 +1,4 @@
-function ringmenu(x, y, parent, items) {
+function ringmenu(x, y, parent, commands) {
 
 //how to svg: arc, coords von kreis fkt
     this.x = x
@@ -6,6 +6,9 @@ function ringmenu(x, y, parent, items) {
     this.parent = parent
     this.id = "contextmenu"
     var self = this
+
+
+
 
     var domelement = document.createElementNS("http://www.w3.org/2000/svg","svg")
     domelement.setAttribute("id",this.id)
@@ -29,15 +32,17 @@ function ringmenu(x, y, parent, items) {
         //From this part on one could draw nian cats, the model would happily drag her
         //over screen :)
         //TODO: this shoulb be a function generate-svg() return SVG-Element
-        var beta = 2*Math.PI/items.length
+        var beta = 2*Math.PI/commands.length
 
         var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
         group.appendChild(defs)
 
-        for (var i=0,len=items.length; i<len; i++){
-            var alpha = i*beta
-            elements[items[i]] = new menu_item(alpha, beta, items[i], group, defs)
-            elements[items[i]].render_item()
+        for (var i = 0, cmd; cmd = commands[i]; i++) {
+            if(cmd.label){
+                var alpha = i*beta
+                elements[cmd.label] = new menu_item(alpha, beta, cmd.label, group, defs)
+                elements[cmd.label].render_item()
+            }
         }
 
         //group.appendChild(render_item())
@@ -108,14 +113,17 @@ function ringmenu(x, y, parent, items) {
 
     this.connect = function(event, listener) {
        	if (listener != null) {
-     	    for (var i=0,len=items.length; i<len; i++){
-     	        $("#"+items[i]).bind(event, listener);
+            for (var i = 0, cmd; cmd = commands[i]; i++) {
+     	        if(cmd.label) $("#"+cmd.label).bind(event, listener);
      	    }
        	}
     }
 
     this.connectAll = function() {
-       	this.connect("mousedown", this.onmousedown);
+       	for (var i = 0, cmd; cmd = commands[i]; i++) {
+         	if(cmd.label) $("#"+cmd.label).bind("mousedown", cmd.handler);
+        }
+       	//this.connect("mousedown", this.onmousedown);
         //this.connect("dblclick", this.ondblclick);
         //this.connect("mouseover", this.onmouseover);
         //this.connect("contextmenu", this.contextmenu);
@@ -131,15 +139,7 @@ function ringmenu(x, y, parent, items) {
 
     }
 
-    this.onmousedown =function(e){
-        execute_target_click($(e.target).parent().attr("id"))
-    }
 
-    function execute_target_click(id){
-          for (var i=0,len=items.length; i<len; i++){
-            if (items[i]==id) elements[items[i]].click()
-          }
-    }
 
 }
 

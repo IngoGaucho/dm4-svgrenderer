@@ -205,9 +205,11 @@
 
     this.contextmenu = function(e) {
             e.preventDefault()
-                    if($("#contextmenu").length==1) $("#contextmenu").remove()
+            if($("#contextmenu").length==1) $("#contextmenu").remove()
+            var items = new Array()
+            var commands = dm4c.get_topic_commands(dm4c.selected_object, "context-menu")
 
-            var menu = new ringmenu(self.getRealCoords().rx, self.getRealCoords().ry, self.parent, ["Edit","associate","retype","hide"])
+            var menu = new ringmenu(self.getRealCoords().rx, self.getRealCoords().ry, self.parent, commands)
             menu.render()
         }
 

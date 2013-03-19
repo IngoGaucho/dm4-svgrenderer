@@ -242,10 +242,12 @@ function SvgRenderer(){
     this.contextmenu = function(e) {
         e.preventDefault()
 
-
         if (e.target == document.getElementById(dom_id)){
             if($("#contextmenu").length==1) $("#contextmenu").remove()
-            var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id, ["Institution", "Note", "Person", "Web"])
+            var items = new Array
+            var commands = dm4c.get_canvas_commands(e.offsetX, e.offsetY, "context-menu")
+
+            var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id, commands)
             menu.render()
         }else{
            source_id = dm4c.selected_object.id
