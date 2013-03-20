@@ -55,18 +55,23 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
 
 
             this.render = function (){
+                if (type_uri) color = dm4c.get_type_color(type_uri)
+                if (!color) color = "red"
                 group = document.createElementNS("http://www.w3.org/2000/svg", "g")
                 group.setAttribute("id",this.id+"assocgroup")
                 group.setAttribute("transform","translate("
-                                   +this.glob_x+
+                                   +(this.glob_x+this.x1)+
                                    ","
-                                   +this.glob_y+
-                                   ")")
+                                   +(this.glob_y+this.y1)+
+                                   ") rotate("
+                                   +Math.atan((self.y2-self.y1)/(self.x2-self.x1))*180/Math.PI+
+                                   ", 0, 0)"
+                                   )
                 var assocline = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                assocline.setAttribute("id", topic_id_1+" und "+topic_id_1)
-                assocline.setAttribute("d", "M "+this.x1+" "+this.y1+" l "+(this.x2-this.x1)+" "+(this.y2-this.y1))
-                assocline.setAttribute("stroke", "red");
-                assocline.setAttribute("stroke-width", "3");
+                assocline.setAttribute("id", topic_id_1+" und "+topic_id_2)
+                assocline.setAttribute("d", "M0,0 L100,0")
+                assocline.setAttribute("stroke", color);
+                assocline.setAttribute("stroke-width", "6");
                 assocline.setAttribute("fill", "none");
                 group.appendChild(assocline)
                 element.appendChild(group)
@@ -103,14 +108,36 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
 
         this.connectAll = function() {
            	this.connect("mousedown", this.mousedown);
+           	this.connect("mousemove", this.mousemove);
            	this.connect("contextmenu", this.contextmenu);
        	}
 
-        this.mousedown = function(e){
-            dm4c.do_select_association(id)
+        //Vars for kinetics
+        var drag = false
+        var prevx = 0
+        var prevy = 0
+        var dx = 0
+        var dy = 0
+
+        function dragON(){
+            drag == true
         }
 
-         this.contextmenu = function(e) {
+        this.mousedown = function(e){
+            dm4c.do_select_association(id)
+            if (e.button == 0) dragON()
+        }
+
+        this.onmousemove = function(e) {
+            alert(drag)
+            if(drag){
+               dm4c.fire_event("post_move_cluster", cluster)
+
+            }
+        }
+
+
+        this.contextmenu = function(e) {
                     e.preventDefault()
 
                     if($("#contextmenu").length==1) $("#contextmenu").remove()
@@ -119,4 +146,8 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                     var menu = new ringmenu(e.offsetX, e.offsetY, self.parent, commands)
                     menu.render()
                 }
+
+
+
+
     }
