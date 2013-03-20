@@ -13,6 +13,8 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
         this.glob_x = glob_x
         this.glob_y = glob_y
 
+        var length = Math.sqrt(Math.pow(self.y2-self.y1,2)+Math.pow(self.x2-self.x1,2))
+        var angle = Math.atan((self.y2-self.y1)/(self.x2-self.x1))*180/Math.PI
 
 
         var element = document.createElementNS("http://www.w3.org/2000/svg","svg")
@@ -39,10 +41,13 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                     this.glob_x = x
                     this.glob_y = y
                     $("#"+id+"assocgroup").attr("transform","translate("
-                                     +this.glob_x+
-                                     ","
-                                     +this.glob_y+
-                                     ")")
+                                                                                  +(this.glob_x+this.x1)+
+                                                                                  ","
+                                                                                  +(this.glob_y+this.y1)+
+                                                                                  ") rotate("
+                                                                                  +angle+
+                                                                                  ", 0, 0)"
+                                                                                  )
                 }
         // ---
 
@@ -55,8 +60,7 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
 
 
             this.render = function (){
-                var length = Math.sqrt(Math.pow(self.y2-self.y1,2)+Math.pow(self.x2-self.x1,2))
-                var angle = Math.atan((self.y2-self.y1)/(self.x2-self.x1))*180/Math.PI
+
                 if (this.x1>this.x2) angle = 180+angle
                 if (type_uri) color = dm4c.get_type_color(type_uri)
                 if (!color) color = "grey"

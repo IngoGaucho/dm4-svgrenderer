@@ -99,6 +99,7 @@
 
         var ball = document.createElementNS("http://www.w3.org/2000/svg", "image");
         ball.setAttributeNS("http://www.w3.org/1999/xlink","href","http://"+document.location.host+icon_src);
+        ball.setAttribute("id",this.id+"img")
         ball.setAttribute("x",-16)
         ball.setAttribute("y",-16)
         ball.setAttribute("width", "32");
