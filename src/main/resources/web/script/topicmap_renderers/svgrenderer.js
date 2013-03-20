@@ -12,7 +12,6 @@ function SvgRenderer(){
     var dom_id = "Iamacoordinatesystemoriginsonobodyneedstostaple"
     svg_topicmap.setAttribute("id",dom_id)
 
-
       // === TopicmapRenderer Implementation ===
 
     this.get_info = function() {
@@ -99,6 +98,9 @@ function SvgRenderer(){
 
             this.close_context_menu = function() {}
 
+            this.remove_topic = function(id, refresh_canvas) {
+                actualmap.hide(id)
+            }
 
 
 
@@ -247,7 +249,7 @@ function SvgRenderer(){
             var items = new Array
             var commands = dm4c.get_canvas_commands(e.offsetX, e.offsetY, "context-menu")
 
-            var menu = new ringmenu(e.offsetX, e.offsetY, "#"+dom_id, commands)
+            var menu = new blockmenu(e.offsetX, e.offsetY, "#"+dom_id, commands)
             menu.render()
         }else{
            source_id = dm4c.selected_object.id

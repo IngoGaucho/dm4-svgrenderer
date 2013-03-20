@@ -19,6 +19,8 @@
          //Create new DOM element
              var domelement = document.createElementNS("http://www.w3.org/2000/svg","svg")
              domelement.setAttribute("id",this.id)
+              domelement.setAttribute("xmlns:svg","http://www.w3.org/2000/svg")
+              domelement.setAttributeNS("xmlns","xlink","http://www.w3.org/1999/xlink")
 
 
 
@@ -81,8 +83,6 @@
     this.render = function (){
         //Create group to contain all childs. this makes placing and transforming independent of the rest of the SVG
         var icon_src = dm4c.get_icon_src(type_uri)
-
-        //alert(icon_src)
         if(this.visibility){
         //if (document.getElementById(this.id) == false) { alert("bark") }
         var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
@@ -95,47 +95,22 @@
         //over screen :)
         //function generate-svg() return SVG-Element
 
-        var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
-        var radGrad = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient")
-        radGrad.setAttribute("id","grad1")
-        radGrad.setAttribute("cx","50%")
-        radGrad.setAttribute("cy","50%")
-        radGrad.setAttribute("r","50%")
-        radGrad.setAttribute("fx","50%")
-        radGrad.setAttribute("fy","50%")
-        var stop = document.createElementNS("http://www.w3.org/2000/svg", "stop")
-        stop.setAttribute("offset","0%")
-        stop.setAttribute("style","stop-color:rgb(0,0,255);stop-opacity:1")
-        radGrad.appendChild(stop)
-        stop = document.createElementNS("http://www.w3.org/2000/svg", "stop")
-        stop.setAttribute("offset","80%")
-        stop.setAttribute("style","stop-color:rgb(0,171,255);stop-opacity:0.49")
-        radGrad.appendChild(stop)
-        stop = document.createElementNS("http://www.w3.org/2000/svg", "stop")
-        stop.setAttribute("offset","100%")
-        stop.setAttribute("style","stop-color:rgb(255,255,255);stop-opacity:0")
-        radGrad.appendChild(stop)
 
 
-        defs.appendChild(radGrad)
-        group.appendChild(defs)
-
-        //For now we do with a blue ball
-        var ball = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        ball.setAttribute("id",this.id+"ball")
-        ball.setAttribute("cx", 0);
-        ball.setAttribute("cy", 0);
-        ball.setAttribute("r", "20");
-        ball.setAttribute("fill","url(#grad1)");
+        var ball = document.createElementNS("http://www.w3.org/2000/svg", "image");
+        ball.setAttributeNS("http://www.w3.org/1999/xlink","href","http://"+document.location.host+icon_src);
+        ball.setAttribute("x",-16)
+        ball.setAttribute("y",-16)
+        ball.setAttribute("width", "32");
+        ball.setAttribute("height","32");
         //ball.setAttribute("stroke","none");
         group.appendChild(ball)
-
         //And a Text with the topics value
         var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
         text.setAttribute("id",this.id+"text")
-        text.setAttribute("x",0)
-        text.setAttribute("y", 30);
-        text.setAttribute("fill", "red");
+        text.setAttribute("x",-16)
+        text.setAttribute("y", 32);
+        text.setAttribute("fill", "black");
         text.appendChild(document.createTextNode(this.value))
         group.appendChild(text)
 
@@ -182,19 +157,9 @@
 
     this.onmousemove = function(e) {
          if (drag) {
-             self.x = self.x+(e.x-prevx)
-             self.y = self.y+(e.y-prevy)
+             self.move_by((e.x-prevx),(e.y-prevy))
              prevx = e.x
              prevy = e.y
-             //$("#"+id+"text").text(cx+" "+cy)
-             $("#"+id+"group").attr("transform","translate("
-                 +self.getRealCoords().rx+
-                 ","
-                 +self.getRealCoords().ry+
-                 ")")
-
-         dm4c.fire_event("post_move_topic", new SvgTopic(id, type_uri, value, self.x, self.y, visibility))
-
          }
     }
 
@@ -220,7 +185,7 @@
             var items = new Array()
             var commands = dm4c.get_topic_commands(dm4c.selected_object, "context-menu")
 
-            var menu = new ringmenu(self.getRealCoords().rx, self.getRealCoords().ry, self.parent, commands)
+            var menu = new blockmenu(self.getRealCoords().rx, self.getRealCoords().ry, self.parent, commands)
             menu.render()
         }
 

@@ -59,7 +59,7 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                 var angle = Math.atan((self.y2-self.y1)/(self.x2-self.x1))*180/Math.PI
                 if (this.x1>this.x2) angle = 180+angle
                 if (type_uri) color = dm4c.get_type_color(type_uri)
-                if (!color) color = "red"
+                if (!color) color = "grey"
                 group = document.createElementNS("http://www.w3.org/2000/svg", "g")
                 group.setAttribute("id",this.id+"assocgroup")
                 group.setAttribute("transform","translate("
@@ -160,6 +160,7 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
         this.onmouseup = function(e) {
             drag = false
         }
+
         this.onmouseout = function(e) {
             drag = false
         }
@@ -181,7 +182,7 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                     if($("#contextmenu").length==1) $("#contextmenu").remove()
                     var commands = dm4c.get_association_commands(dm4c.selected_object, "context-menu")
 
-                    var menu = new ringmenu(e.offsetX, e.offsetY, self.parent, commands)
+                    var menu = new blockmenu(e.offsetX, e.offsetY, self.parent, commands)
                     menu.render()
                 }
 

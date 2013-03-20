@@ -137,7 +137,7 @@ function Svgmap(topicmap_id, config) {
     this.hide = function(id) {
         var topic = topics[id]
         var assoc = assocs[id]
-
+        alert("hide")
         if (LOG_TOPICMAPS) dm4c.log("Hiding assoc/topic " + id +" from topicmap " + topicmap_id)
         // update memory
         if (topic){
@@ -156,6 +156,7 @@ function Svgmap(topicmap_id, config) {
     }
 
     this.hide_association = function(id) {
+        alert("gong")
         var assoc = assocs[id]
         if (LOG_TOPICMAPS) dm4c.log("Hiding association " + id + " from topicmap " + topicmap_id)
         // update memory
