@@ -220,7 +220,6 @@ function Svgmap(topicmap_id, config) {
     }
     this.delete_topic = function(id) {
         var topic = topics[id]
-                    alert(id)
 
         if (topic) {
             if (LOG_TOPICMAPS) dm4c.log("..... Deleting topic " + id + " (\"" + topic.value + "\") from topicmap " +
@@ -266,15 +265,16 @@ function Svgmap(topicmap_id, config) {
         }
     }
 
-    this.move_cluster = function(cluster) {
+    this.move_cluster = function(dragdata) {
         // update memory
-        cluster.iterate_topics(function(ct) {
-            topics[ct.id].move_to(ct.x, ct.y)
-        })
+        cluster = new Cluster(dragdata.assoc)
+        cluster.move_by(dragdata.dx,dragdata.dy)
+         //   topics[ct.id].move_to(ct.x, ct.y)
+        //})
         // update DB
-        if (is_writable()) {
-            dm4c.restc.move_cluster(topicmap_id, cluster_coords())
-        }
+        //if (is_writable()) {
+          //  dm4c.restc.move_cluster(topicmap_id, cluster_coords())
+        //}
 
         function cluster_coords() {
             var coord = []
@@ -446,6 +446,43 @@ function Svgmap(topicmap_id, config) {
 
 
     // ------------------------------------------------------------------------------------------------- Private Classes
+    // ---
 
+    function Cluster(ca) {
+
+        var cts = []    // array of CanvasTopic
+
+        add_to_cluster(topics[ca.get_topic_1()])
+
+        this.move_by = function(dx, dy) {
+            this.iterate_topics(function(ct) {
+                ct.move_by(dx, dy)
+            })
+        }
+
+        this.iterate_topics = function(visitor_func) {
+            for (var i = 0, ct; ct = cts[i]; i++) {
+                visitor_func(ct)
+            }
+        }
+
+        function add_to_cluster(ct) {
+            if (is_in_cluster(ct)) {
+                return
+            }
+            //
+            cts.push(ct)
+            var cas = self.get_associations(ct.id)
+            for (var i = 0, ca; ca = cas[i]; i++) {
+                add_to_cluster(topics[ca.get_other_topic(ct.id)])
+            }
+        }
+
+        function is_in_cluster(ct) {
+            return js.includes(cts, function(cat) {
+                return cat.id == ct.id
+            })
+        }
+    }
 
 }

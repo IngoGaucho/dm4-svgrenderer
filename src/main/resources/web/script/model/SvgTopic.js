@@ -12,13 +12,7 @@
         this.glob_y = glob_y
         var self = this
         this.parent
-        //Vars for kinetics
-        var dragON = false
-        var prevx = 0
-        var prevy = 0
-        var dx = 0
-        var dy = 0
-        var TrueCoords = null;
+       
 
         //
 
@@ -50,6 +44,16 @@
                              +this.getRealCoords().ry+
                              ")")
         }
+        this.move_by = function(dx, dy) {
+            this.x = this.x+dx
+            this.y = this.y+dy
+            $("#"+id+"group").attr("transform","translate("
+                             +this.getRealCoords().rx+
+                             ","
+                             +this.getRealCoords().ry+
+                             ")")
+        dm4c.fire_event("post_move_topic", new SvgTopic(id, type_uri, value, self.x, self.y, self.visibility))
+        }
 
         /**
          * @param   topic   a Topic object
@@ -76,7 +80,9 @@
 
     this.render = function (){
         //Create group to contain all childs. this makes placing and transforming independent of the rest of the SVG
+        var icon_src = dm4c.get_icon_src(type_uri)
 
+        //alert(icon_src)
         if(this.visibility){
         //if (document.getElementById(this.id) == false) { alert("bark") }
         var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
@@ -159,15 +165,23 @@
         this.connect("mousemove", this.onmousemove);
      }
 
+     //Vars for kinetics
+            var drag = false
+            var prevx = 0
+            var prevy = 0
+            var dx = 0
+            var dy = 0
+            var TrueCoords = null;
+
     this.onmousedown = function(e) {
         dm4c.do_select_topic(id)
-        if(e.button == 0 && !e.shiftKey) dragON = true
+        if(e.button == 0 && !e.shiftKey) drag = true
         prevx = e.x
         prevy = e.y
     }
 
     this.onmousemove = function(e) {
-         if (dragON) {
+         if (drag) {
              self.x = self.x+(e.x-prevx)
              self.y = self.y+(e.y-prevy)
              prevx = e.x
@@ -197,10 +211,7 @@
     }
 
     function dragOFF(){
-        //$("#"+this.id+"text").text('dragstop')
-        dragON = false
-
-
+        drag = false
     }
 
     this.contextmenu = function(e) {
@@ -222,5 +233,4 @@
         var ry = this.y+this.glob_y
         return {"rx":rx,"ry": ry}
     }
-
-        }
+}
