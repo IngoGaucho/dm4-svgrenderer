@@ -96,7 +96,6 @@ function blockmenu(x, y, parent, commands) {
     this.connectAll = function() {
        	for (var i = 0, cmd; cmd = commands[i]; i++) {
          	if(cmd.label) {
-         	alert(cmd.handler)
          	$("#"+cmd.label).bind("mousedown", cmd.handler);
          	}
         }
