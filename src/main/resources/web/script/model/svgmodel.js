@@ -134,13 +134,12 @@ function Svgmap(topicmap_id, config) {
         }
     }
 
-    this.hide = function(id) {
+    this.hide_topic = function(id) {
         var topic = topics[id]
         var assoc = assocs[id]
         alert("hide")
         if (LOG_TOPICMAPS) dm4c.log("Hiding assoc/topic " + id +" from topicmap " + topicmap_id)
         // update memory
-        if (topic){
             topic.hide()
             var cas = this.get_associations(id)
             for (var i = 0, ca; ca = cas[i]; i++) {
@@ -149,9 +148,7 @@ function Svgmap(topicmap_id, config) {
           if (is_writable()) {
                 dm4c.restc.set_topic_visibility(topicmap_id, id, false)
             }
-        } else if (assoc) {
-            this.hide_association(assoc.id)
-        }
+
 
     }
 

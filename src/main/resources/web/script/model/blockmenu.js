@@ -16,9 +16,10 @@ function blockmenu(x, y, parent, commands) {
     var elements = {}
 
     this.remove = function() {
-       $("#"+this.id).children().remove()
-       $("#"+this.id).empty()
-       $("#"+this.id).remove()
+       //alert($("#contextmenu").children())
+       //$("#contextmenu").children().remove()
+       //$("#contextmenu").empty()
+       //$("#contextmenu").remove()
     }
 
     this.render = function(){
@@ -105,14 +106,12 @@ function blockmenu(x, y, parent, commands) {
         //this.connect("contextmenu", this.contextmenu);
         //this.connect("mouseout", this.onmouseout);
         //this.connect("mousedown", this.onmousedown);
-        //this.connect("mouseup", this.onmouseup);
-        this.connect("mousemove", this.onmousemove);
+        this.connect("mouseup", this.onmouseup);
+        //this.connect("mousemove", this.onmousemove);
     }
 
-    this.onmousemove =function(e){
-
-       // $(e.target).attr("id")
-
+    this.onmouseup =function(e){
+        this.remove()
     }
 
 

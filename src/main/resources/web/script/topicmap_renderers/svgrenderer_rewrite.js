@@ -21,10 +21,17 @@ function SvgRenderer() {
     var model = new DefaultTopicmapRenderer.Model()
 
     //dom
-    this.dom = $("<svg>", {id: "Topicmap"})
+    this.dom = $("<div>", {id: "TopicmapDiv"})
+    var svg_topicmap = document.createElementNS("http://www.w3.org/2000/svg", "svg")
     var dom_id = "Topicmap"
+    svg_topicmap.setAttribute("id", dom_id)
 
 
+    // An invisible rect to have something to touch
+    //svg_topicmap.setAttribute("x","0")
+    //svg_topicmap.setAttribute("y","-25")
+    //svg_topicmap.setAttribute("fill", "transparent");
+    //svg_topicmap.setAttribute("stroke", "none");
     // ==
 
     this.get_info = function() {
@@ -44,8 +51,10 @@ function SvgRenderer() {
     this.display_topicmap = function(topicmap, no_history_update) {
         //Clear any previous DOMs
         if($("#contextmenu").length==1) $("#contextmenu").remove()
+        model.translate_by(topicmap.trans_x, topicmap.trans_y)
 
 
+        this.dom.append(svg_topicmap);
 
 
         display_topics()
@@ -55,7 +64,6 @@ function SvgRenderer() {
         function display_topics() {
             topicmap.iterate_topics(function(topic) {
                     if (topic.visibility) {
-                        alert(topic.label)
                         // Note: canvas.add_topic() expects an topic object with "value" property (not "label")
                         var t = {id: topic.id, type_uri: topic.type_uri, value: topic.label, x: topic.x, y: topic.y}
                         dm4c.canvas.add_topic(t)
@@ -96,6 +104,7 @@ function SvgRenderer() {
     this.add_topic = function(topic, do_select) {
         if (!model.topic_exists(topic.id)) {
             model.add_topic(topic)
+
             render_topic(topic)
         }
         //
@@ -108,7 +117,8 @@ function SvgRenderer() {
 
     this.add_association = function(assoc, do_select) {
         if (!model.association_exists(assoc.id)) {
-            model.add_association(assoc)
+           render_assoc(assoc)
+           model.add_association(assoc)
         }
          if (do_select) {
             model.set_highlight_association(assoc.id)
@@ -154,7 +164,14 @@ function SvgRenderer() {
      *
      * @return  an object with "select" and "display" properties (both values are Topic objects).
      */
-    this.select_topic = function(topic_id) {}
+    this.select_topic = function(topic_id) {
+        // 1) fetch from DB
+        var topic = dm4c.fetch_topic(topic_id)
+        // 2) update model
+        model.set_highlight_topic(topic_id)
+        //
+        return {select: topic, display: topic}
+    }
 
     this.select_association = function(assoc_id) {}
 
@@ -186,7 +203,11 @@ function SvgRenderer() {
     /**
      * @param   size    an object with "width" and "height" properties.
      */
-    this.resize = function(size) {}
+    this.resize = function(size) {
+        //this.dom.width(size.width).height(size.height)
+        svg_topicmap.setAttribute("width",size.width)
+        svg_topicmap.setAttribute("height",size.height)
+    }
 
     this.resize_end = function() {}
 
@@ -195,19 +216,18 @@ function SvgRenderer() {
     // === Private Methods ===
 
     function render_topic(topic){
-        if(this.visibility){
             //group
             var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
             group.setAttribute("id",topic.id)
             group.setAttribute("transform","translate("
-                +topic.x+model.trans_x
+                +(topic.x+model.trans_x)
                 +","
-                +topic.y+model.trans_y
+                +(topic.y+model.trans_y)
                 +")"
             )
 
             //Image
-            var icon_src = dm4c.get_icon_src(type_uri)
+            var icon_src = dm4c.get_icon_src(topic.type_uri)
             var ball = document.createElementNS("http://www.w3.org/2000/svg", "image");
             ball.setAttributeNS("http://www.w3.org/1999/xlink","href","http://"+document.location.host+icon_src);
             ball.setAttribute("x",-16)
@@ -219,7 +239,7 @@ function SvgRenderer() {
             //Text
 
             var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
-            text.setAttribute("id",topic.id+"text")
+            text.setAttribute("id",topic.id+" text")
             text.setAttribute("x",-16)
             text.setAttribute("y", 32);
             text.setAttribute("fill", "black");
@@ -228,22 +248,21 @@ function SvgRenderer() {
 
             //Append to parent
 
-            $("#"+self.dom_id).append(group)
-        }
+            $("#"+dom_id).append(group)
+
     }
 
 
     function render_assoc(assoc){
         //Vars for drawing
-        alert(assoc.topic_id_1)
-        var t1 = model.get_topic(assoc.topic_id_1)
-        var t2 = model.get_topic(assoc.topic_id_2)
-        var angle = Math.atan((t2.y-t1.y)/(t2.x-t1.x1))*180/Math.PI
-        var length = Math.sqrt(Math.pow(t2.y-t1.y,2)+Math.pow(t2.x-t1.x,2))
-        if (this.x1>this.x2) angle = 180+angle
-        if (type_uri) color = dm4c.get_type_color(type_uri)
-        if (!color) color = "grey"
 
+        var t1 = model.get_topic(assoc.role_1.topic_id)
+        var t2 = model.get_topic(assoc.role_2.topic_id)
+        var angle = Math.atan((t2.y-t1.y)/(t2.x-t1.x))*180/Math.PI
+        var length = Math.sqrt(Math.pow(t2.y-t1.y,2)+Math.pow(t2.x-t1.x,2))
+        if (t1.x>t2.x) angle = 180+angle
+        if (assoc.type_uri) color = dm4c.get_type_color(assoc.type_uri)
+        if (!color) color = "grey"
         //group
         var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
         group.setAttribute("id",assoc.id)
@@ -259,7 +278,6 @@ function SvgRenderer() {
         //Line
 
         var assocline = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        assocline.setAttribute("id", topic_id_1+" und "+topic_id_2)
         assocline.setAttribute("d", "M0,0 L"+length+",0")
         assocline.setAttribute("stroke", color);
         assocline.setAttribute("stroke-width", "6");
@@ -278,7 +296,7 @@ function SvgRenderer() {
 
         //Append to parent
 
-        $("#"+self.dom_id).append(group)
+        $("#"+dom_id).prepend(group)
 
     }
 
@@ -293,7 +311,39 @@ function SvgRenderer() {
      */
 
     function clear_topic_or_assoc(id) {}
+
+    //=== Eventhandling Helper Functions ====
+
+    this.connect = function(event, listener) {
+       	if (listener != null) {
+     	    this.dom.bind(event, listener);
+       	}
+    }
+
+    this.connectAll = function() {
+       	//this.connect("click", this.onclick);
+        //this.connect("dblclick", this.ondblclick);
+        //this.connect("mouseover", this.onmouseover);
+        //this.connect("contextmenu", this.contextmenu);
+        //this.connect("mouseout", this.onmouseout);
+        this.connect("mousedown", this.onmousedown);
+        //this.connect("mouseup", this.onmouseup);
+        //this.connect("mousemove", this.onmousemove);
+    }
+
     // === Events ===
+
+    // Kinetics
+    var drag = false
+    var cx = 0
+    var cy = 0
+    var prevx, prevy
+    var assoc_draw = false
+    var source_id
+
+    this.onmousedown = function(e) {
+        alert(e.target.id.match(/text$/i))
+    }
 
 
 }

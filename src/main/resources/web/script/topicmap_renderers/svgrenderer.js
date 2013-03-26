@@ -7,7 +7,7 @@ function SvgRenderer(){
     this.dom = $("<div>", {id: "canvas"})
     var actual_map
 
-    //Construct dom
+    //dom
     var svg_topicmap = document.createElementNS("http://www.w3.org/2000/svg", "svg")
     var dom_id = "Iamacoordinatesystemoriginsonobodyneedstostaple"
     svg_topicmap.setAttribute("id",dom_id)
@@ -99,9 +99,12 @@ function SvgRenderer(){
             this.close_context_menu = function() {}
 
             this.remove_topic = function(id, refresh_canvas) {
-                actualmap.hide(id)
+                actual_map.hide_topic(id)
             }
 
+            this.get_associations = function(topic_id) {
+                    return actual_map.get_associations(topic_id)
+                }
 
 
     // === Left SplitPanel Component Implementation ===
@@ -194,20 +197,7 @@ function SvgRenderer(){
 
             }
         }
-        if($("#contextmenu").length==1){
-                        $("#contextmenu").remove()
-                        if ($(e.target).parent().attr("id")=="hide") actual_map.hide(source_id)
-                        if ($(e.target).parent().attr("id")=="Web"){
-                            dm4c.create_topic
-                                 dm4c.fire_event("post_show_topic", new SvgTopic(id, type_uri, value, self.x, self.y, visibility))
-                        }
-                        //if ($(e.target).parent().attr("id")=="delete") actual_map.delete_item(source_id)
-                        if ($(e.target).parent().attr("id")=="associate"){
-                            start_assoc(e.offsetX,e.offsetY)
-                        }
-        }
-        }
-    }
+    }           }
 
 
     this.onmousemove = function(e) {

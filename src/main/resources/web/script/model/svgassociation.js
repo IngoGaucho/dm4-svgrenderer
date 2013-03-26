@@ -13,8 +13,8 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
         this.glob_x = glob_x
         this.glob_y = glob_y
 
-        var length = Math.sqrt(Math.pow(self.y2-self.y1,2)+Math.pow(self.x2-self.x1,2))
-        var angle = Math.atan((self.y2-self.y1)/(self.x2-self.x1))*180/Math.PI
+        var length
+        var angle
 
 
         var element = document.createElementNS("http://www.w3.org/2000/svg","svg")
@@ -60,7 +60,8 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
 
 
             this.render = function (){
-
+                angle = Math.atan((self.y2-self.y1)/(self.x2-self.x1))*180/Math.PI
+                length = Math.sqrt(Math.pow(self.y2-self.y1,2)+Math.pow(self.x2-self.x1,2))
                 if (this.x1>this.x2) angle = 180+angle
                 if (type_uri) color = dm4c.get_type_color(type_uri)
                 if (!color) color = "grey"
@@ -86,8 +87,8 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
                 rect.setAttribute("x","0")
                 rect.setAttribute("y","-25")
                 rect.setAttribute("width",length)
-                rect.setAttribute("height",50)
-                rect.setAttribute("fill", "none");
+                rect.setAttribute("height","50")
+                rect.setAttribute("fill", "transparent");
                 rect.setAttribute("stroke", "none");
 
                 group.appendChild(assocline)
@@ -154,6 +155,10 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
             drag = true
         }
 
+        function dragOFF(){
+            drag = false
+        }
+
         this.mousedown = function(e){
             dm4c.do_select_association(id)
             if (e.button == 0) dragON()
@@ -162,11 +167,12 @@ function SvgAssociation(id, type_uri, topic_id_1, topic_id_2, x1, y1 ,x2, y2, gl
         }
 
         this.onmouseup = function(e) {
-            drag = false
+            dragOFF()
         }
 
         this.onmouseout = function(e) {
-            drag = false
+
+            dragOFF()
         }
 
         this.onmousemove = function(e) {
