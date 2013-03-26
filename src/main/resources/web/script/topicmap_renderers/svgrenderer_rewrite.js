@@ -18,7 +18,7 @@ function SvgRenderer() {
     var self = this
 
     // Model
-    var model = new DefaultTopicmapRenderer.Model()
+    var model = new DefaultTopicmapViewmodel()
 
     //dom
     this.dom = $("<div>", {id: "TopicmapDiv"})
@@ -173,7 +173,11 @@ function SvgRenderer() {
         return {select: topic, display: topic}
     }
 
-    this.select_association = function(assoc_id) {}
+    this.select_association = function(assoc_id) {
+        // 1) fetch from DB
+        var assoc = dm4c.fetch_association(assoc_id)
+        return assoc
+    }
 
     this.reset_selection = function(refresh_canvas) {}
 
@@ -229,6 +233,7 @@ function SvgRenderer() {
             //Image
             var icon_src = dm4c.get_icon_src(topic.type_uri)
             var ball = document.createElementNS("http://www.w3.org/2000/svg", "image");
+            ball.setAttribute("id",topic.id+"img")
             ball.setAttributeNS("http://www.w3.org/1999/xlink","href","http://"+document.location.host+icon_src);
             ball.setAttribute("x",-16)
             ball.setAttribute("y",-16)
@@ -239,7 +244,7 @@ function SvgRenderer() {
             //Text
 
             var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
-            text.setAttribute("id",topic.id+" text")
+            text.setAttribute("id",topic.id+"text")
             text.setAttribute("x",-16)
             text.setAttribute("y", 32);
             text.setAttribute("fill", "black");
@@ -278,6 +283,7 @@ function SvgRenderer() {
         //Line
 
         var assocline = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        assocline.setAttribute("id",assoc.id+"line")
         assocline.setAttribute("d", "M0,0 L"+length+",0")
         assocline.setAttribute("stroke", color);
         assocline.setAttribute("stroke-width", "6");
@@ -286,6 +292,7 @@ function SvgRenderer() {
 
         // An invisible rect to have something to touch
         var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("id",assoc.id+"touchblock")
         rect.setAttribute("x","0")
         rect.setAttribute("y","-25")
         rect.setAttribute("width",length)
@@ -300,11 +307,37 @@ function SvgRenderer() {
 
     }
 
-    function move_topic(topic){
-
+    function move_topic(id, dx, dy){
+        topic = model.get_topic(id)
+        topic.move_by(dx,dy)
+        $("#"+id).attr("transform","translate("
+                +(topic.x+model.trans_x)
+                +","
+                +(topic.y+model.trans_y)
+                +")")
+        var cas = model.get_associations(topic.id)
+        for (var i = 0, ca; ca = cas[i]; i++) {
+            move_assoc(ca)
+        }
     }
 
-    function move_assoc(assoc) {}
+    function move_assoc(assoc) {
+        var t1 = model.get_topic(assoc.role_1.topic_id)
+        var t2 = model.get_topic(assoc.role_2.topic_id)
+        var angle = Math.atan((t2.y-t1.y)/(t2.x-t1.x))*180/Math.PI
+        var length = Math.sqrt(Math.pow(t2.y-t1.y,2)+Math.pow(t2.x-t1.x,2))
+        if (t1.x>t2.x) angle = 180+angle
+        $("#"+assoc.id).attr("transform","translate("
+                                   +(model.trans_x+t1.x)+
+                                   ","
+                                   +(model.trans_y+t1.y)+
+                                   ") rotate("
+                                   +angle+
+                                   ", 0, 0)"
+                                   )
+        $("#"+assoc.id+"line").attr("d", "M0,0 L"+length+",0")
+        $("#"+assoc.id+"touchblock").attr("width",length)
+    }
 
     /**
      * @param   id  the id of the topic or the assoc
@@ -321,20 +354,24 @@ function SvgRenderer() {
     }
 
     this.connectAll = function() {
-       	//this.connect("click", this.onclick);
+       	this.connect("click", this.onmouseup); //mouseup isn't fired upon click in ffox
         //this.connect("dblclick", this.ondblclick);
         //this.connect("mouseover", this.onmouseover);
         //this.connect("contextmenu", this.contextmenu);
         //this.connect("mouseout", this.onmouseout);
         this.connect("mousedown", this.onmousedown);
-        //this.connect("mouseup", this.onmouseup);
-        //this.connect("mousemove", this.onmousemove);
+        this.connect("mouseup", this.onmouseup);
+        this.connect("mousemove", this.onmousemove);
     }
 
     // === Events ===
 
     // Kinetics
-    var drag = false
+    var drag_topic = false
+    var drag_cluster = false
+    var drag_topicmap = false
+    var target_id
+    var cluster
     var cx = 0
     var cy = 0
     var prevx, prevy
@@ -342,7 +379,39 @@ function SvgRenderer() {
     var source_id
 
     this.onmousedown = function(e) {
-        alert(e.target.id.match(/text$/i))
+        prevx = e.clientX
+        prevy = e.clientY
+        target_id = e.target.id.match(/[0-9]+/)
+        if(target_id){
+            if(model.topic_exists(target_id)){
+                dm4c.do_select_topic(target_id)
+                if(e.shiftKey){}
+                else {drag_topic = true}
+            } else if(model.association_exists(target_id)){
+                dm4c.do_select_association(target_id)
+                cluster = cluster || model.create_cluster(dm4c.fetch_association(target_id))
+                drag_cluster = true
+            }
+        }
+    }
+
+    this.onmouseup = function(e) {
+        drag_topic = false
+        drag_cluster = false
+        drag_topicmap = false
+        if($("#contextmenu").length==1) $("#contextmenu").remove()
+    }
+
+    this.onmousemove = function(e) {
+        var dx = (e.clientX-prevx)
+        var dy = (e.clientY-prevy)
+        if(drag_topic){
+           move_topic(target_id,dx,dy)
+        } else if (drag_cluster) {
+           cluster.move_by(dx, dy)
+        }
+        prevx = e.clientX
+        prevy = e.clientY
     }
 
 
