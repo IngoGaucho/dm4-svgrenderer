@@ -50,10 +50,16 @@ function SvgRenderer() {
 
     this.display_topicmap = function(topicmap, no_history_update) {
         //Clear any previous DOMs
+        if (svg_topicmap.hasChildNodes()){
+            while ( svg_topicmap.childNodes.length >= 1 ){
+                svg_topicmap.removeChild( svg_topicmap.firstChild );
+            }
+
+        }
         if($("#contextmenu").length==1) $("#contextmenu").remove()
         model.translate_by(topicmap.trans_x, topicmap.trans_y)
 
-
+        alert("hello")
         this.dom.append(svg_topicmap);
 
 
@@ -103,8 +109,8 @@ function SvgRenderer() {
      */
     this.add_topic = function(topic, do_select) {
         if (!model.topic_exists(topic.id)) {
+            init_position()
             model.add_topic(topic)
-
             render_topic(topic)
         }
         //
@@ -113,6 +119,13 @@ function SvgRenderer() {
         }
         //
         return topic
+
+        function init_position() {
+            if (topic.x == undefined || topic.y == undefined) {
+                topic.x = Math.floor(svg_topicmap.getAttribute("width")/2)
+                topic.y = Math.floor(svg_topicmap.getAttribute("height")/2)
+            }
+        }
     }
 
     this.add_association = function(assoc, do_select) {
@@ -153,7 +166,13 @@ function SvgRenderer() {
      * reset the translation. This applies to the HTML5 canvas (default topicmap renderer) but not to an
      * OpenLayers map (geomaps renderer).
      */
-    this.clear = function() {}
+    this.clear = function() {
+
+        model.translate_by(-model.trans_x, -model.trans_y)
+
+        model.clear()
+
+    }
 
     // === Selection ===
 
@@ -190,12 +209,6 @@ function SvgRenderer() {
     this.refresh = function() {}
 
     this.close_context_menu = function() {}
-
-    // === Grid Positioning ===
-
-    this.start_grid_positioning = function() {}
-
-    this.stop_grid_positioning = function() {}
 
     // === Left SplitPanel Component ===
 
@@ -261,11 +274,19 @@ function SvgRenderer() {
     function render_assoc(assoc){
         //Vars for drawing
 
-        var t1 = model.get_topic(assoc.role_1.topic_id)
-        var t2 = model.get_topic(assoc.role_2.topic_id)
+        var t1
+        if(!model.get_topic(assoc.role_1.topic_id)){
+            t1 = init_position()
+        } else {t1 = model.get_topic(assoc.role_1.topic_id)}
+        var t2
+        if(!model.get_topic(assoc.role_2.topic_id)){
+            t2 = init_position()
+        } else {t2 = model.get_topic(assoc.role_2.topic_id)}
+
         var angle = Math.atan((t2.y-t1.y)/(t2.x-t1.x))*180/Math.PI
         var length = Math.sqrt(Math.pow(t2.y-t1.y,2)+Math.pow(t2.x-t1.x,2))
         if (t1.x>t2.x) angle = 180+angle
+        var color
         if (assoc.type_uri) color = dm4c.get_type_color(assoc.type_uri)
         if (!color) color = "grey"
         //group
@@ -305,12 +326,53 @@ function SvgRenderer() {
 
         $("#"+dom_id).prepend(group)
 
+        function init_position() {
+            var x = Math.floor(svg_topicmap.getAttribute("width")/2)
+            var y = Math.floor(svg_topicmap.getAttribute("height")/2)
+            return {x: x, y: y}
+        }
     }
 
-    function move_topic(id, dx, dy){
-        topic = model.get_topic(id)
-        topic.move_by(dx,dy)
-        $("#"+id).attr("transform","translate("
+    function render_temporary_assoc(topic, dx,dy){
+        //Vars for drawing
+
+        var angle = Math.atan((dy-topic.y)/(dx-topic.x))*180/Math.PI
+        var length = Math.sqrt(Math.pow(dy-topic.y,2)+Math.pow(dx-topic.x,2))
+        if (topic.x>dx) angle = 180+angle
+        var color = "grey"
+        //group
+        var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+        group.setAttribute("id","tempassoc")
+        group.setAttribute("transform","translate("
+                           +(model.trans_x+topic.x)+
+                           ","
+                           +(model.trans_y+topic.y)+
+                           ") rotate("
+                           +angle+
+                           ", 0, 0)"
+                           )
+
+        //Line
+
+        var assocline = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        assocline.setAttribute("id","tempassocline")
+        assocline.setAttribute("d", "M0,0 L"+length+",0")
+        assocline.setAttribute("stroke", color);
+        assocline.setAttribute("stroke-width", "6");
+        assocline.setAttribute("fill", "none");
+        group.appendChild(assocline)
+
+        //Append to parent
+
+        $("#"+dom_id).prepend(group)
+    }
+
+    function remove_temporary_assoc(){
+        $("#tempassoc").remove()
+    }
+
+    function move_topic(topic, dx, dy){
+        $("#"+topic.id).attr("transform","translate("
                 +(topic.x+model.trans_x)
                 +","
                 +(topic.y+model.trans_y)
@@ -339,6 +401,29 @@ function SvgRenderer() {
         $("#"+assoc.id+"touchblock").attr("width",length)
     }
 
+    function move_temporary_assoc(topic,dx,dy) {
+        var angle = Math.atan((dy)/(dx))*180/Math.PI
+        var length = Math.sqrt(Math.pow(dy,2)+Math.pow(dx,2))
+        if (dx<0) angle = 180+angle
+        $("#tempassoc").attr("transform","translate("
+                                   +(model.trans_x+topic.x)+
+                                   ","
+                                   +(model.trans_y+topic.y)+
+                                   ") rotate("
+                                   +angle+
+                                   ", 0, 0)"
+                                   )
+        $("#tempassocline").attr("d", "M0,0 L"+length+",0")
+
+    }
+
+    function move_canvas(dx, dy){
+        model.iterate_topics(function(ct){
+            move_topic(ct,dx,dy)
+        })
+    }
+
+
     /**
      * @param   id  the id of the topic or the assoc
      */
@@ -357,11 +442,12 @@ function SvgRenderer() {
        	this.connect("click", this.onmouseup); //mouseup isn't fired upon click in ffox
         //this.connect("dblclick", this.ondblclick);
         //this.connect("mouseover", this.onmouseover);
-        //this.connect("contextmenu", this.contextmenu);
-        //this.connect("mouseout", this.onmouseout);
+        this.connect("contextmenu", this.contextmenu);
+        this.connect("mouseout", this.onmouseout);
         this.connect("mousedown", this.onmousedown);
         this.connect("mouseup", this.onmouseup);
         this.connect("mousemove", this.onmousemove);
+        this.dom.bind("dragstart", function() {return false}) //prevent ffox default drag
     }
 
     // === Events ===
@@ -372,11 +458,11 @@ function SvgRenderer() {
     var drag_topicmap = false
     var target_id
     var cluster
+    var action_topic
     var cx = 0
     var cy = 0
     var prevx, prevy
     var assoc_draw = false
-    var source_id
 
     this.onmousedown = function(e) {
         prevx = e.clientX
@@ -384,35 +470,78 @@ function SvgRenderer() {
         target_id = e.target.id.match(/[0-9]+/)
         if(target_id){
             if(model.topic_exists(target_id)){
+                action_topic= model.get_topic(target_id)
                 dm4c.do_select_topic(target_id)
-                if(e.shiftKey){}
-                else {drag_topic = true}
+                if(e.shiftKey){
+                    render_temporary_assoc(action_topic,action_topic.x,action_topic.y)
+                    assoc_draw = true
+                }
+                else {
+                    drag_topic = true
+                }
             } else if(model.association_exists(target_id)){
                 dm4c.do_select_association(target_id)
-                cluster = cluster || model.create_cluster(dm4c.fetch_association(target_id))
+                cluster = cluster || model.create_cluster(model.get_association(target_id))
                 drag_cluster = true
             }
+        } else {
+            drag_topicmap = true
         }
     }
 
     this.onmouseup = function(e) {
-        drag_topic = false
-        drag_cluster = false
-        drag_topicmap = false
+        var target = e.target.id.match(/[0-9]+/)
+        drag_end(target)
         if($("#contextmenu").length==1) $("#contextmenu").remove()
     }
+
+    function drag_end(target){
+        if (drag_topic) {
+            drag_topic = false
+            dm4c.fire_event("post_move_topic", model.get_topic(target_id))
+        }else if (drag_cluster) {
+            drag_cluster = false
+            dm4c.fire_event("post_move_cluster", cluster)
+        }else if (drag_topicmap) {
+            drag_topicmap = false
+            dm4c.fire_event("post_move_canvas", model.trans_x, model.trans_y)
+        }else if (assoc_draw){
+            remove_temporary_assoc()
+            assoc_draw = false
+            if(target){
+                var topic = dm4c.fetch_topic(target)
+                dm4c.do_create_association("dm4.core.association", topic)
+            }
+        }
+    }
+
+
 
     this.onmousemove = function(e) {
         var dx = (e.clientX-prevx)
         var dy = (e.clientY-prevy)
-        if(drag_topic){
-           move_topic(target_id,dx,dy)
+        if(assoc_draw){
+            move_temporary_assoc(action_topic,dx,dy)
+            return
+        }else if(drag_topic){
+            action_topic.move_by(dx, dy)
+            move_topic(action_topic,dx,dy)
         } else if (drag_cluster) {
-           cluster.move_by(dx, dy)
+            cluster.move_by(dx, dy)
+            cluster.iterate_topics(function(ct){
+                move_topic(ct,dx,dy)
+            })
+        } else if (drag_topicmap) {
+           move_canvas(dx, dy)
+           model.translate_by(dx, dy)
         }
+
         prevx = e.clientX
         prevy = e.clientY
     }
 
+    this.onmouseout = function(e) {
+        e.preventDefault()
+    }
 
 }
