@@ -14,13 +14,7 @@ function blockmenu(x, y, parent, commands) {
     domelement.setAttribute("id",this.id)
 
     var elements = {}
-
-    this.remove = function() {
-       //alert($("#contextmenu").children())
-       //$("#contextmenu").children().remove()
-       //$("#contextmenu").empty()
-       //$("#contextmenu").remove()
-    }
+    var width = 0
 
     this.render = function(){
         var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
@@ -28,59 +22,62 @@ function blockmenu(x, y, parent, commands) {
         group.setAttribute("id",this.id+"group")
         domelement.appendChild(group)
         group.setAttribute("transform","translate("+this.x+","+this.y+")")
-
-
-        //From this part on one could draw nian cats, the model would happily drag her
-        //over screen :)
-        //TODO: this shoulb be a function generate-svg() return SVG-Element
-
+        $(this.parent).append(domelement)
 
         for (var i = 0, cmd; cmd = commands[i]; i++) {
             if(cmd.label){
                 elements[cmd.label] = new menu_item(i, cmd.label, group)
-                elements[cmd.label].render_item()
+                elements[cmd.label].render_item_text()
+            }
+        }
+        for (var i = 0, cmd; cmd = commands[i]; i++) {
+            if(cmd.label){
+                elements[cmd.label].render_item_box(width)
             }
         }
 
         //group.appendChild(render_item())
 
-        $(this.parent).append(domelement)
         this.connectAll()
-
 
     }
 
     //menue items modell
 
     function menu_item(i, name, group){
+        //subgroup for item
+        var piecentext = document.createElementNS("http://www.w3.org/2000/svg", "g")
+        piecentext.setAttribute("id", name);
+        this.render_item_text = function (){
 
-        this.name = name
+            //item text
+            var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
+            text.setAttribute("id", name+":text");
+            text.setAttribute("fill", "black");
+            text.setAttribute("font-size", "12");
+            text.setAttribute("x", "16")
+            text.setAttribute("y", 28+i*16);
+            text.appendChild(document.createTextNode(name))
+            piecentext.appendChild(text)
+            group.appendChild(piecentext)
+            //needed for boxrendering, finding the largest element
+            item_width = document.getElementById(name+":text").getComputedTextLength()
 
-        this.render_item = function (){
-
-                                var piecentext = document.createElementNS("http://www.w3.org/2000/svg", "g")
-
-                var piece = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                piecentext.setAttribute("id", name);
-                piece.setAttribute("x", "0");
-                piece.setAttribute("y", i*16);
-                piece.setAttribute("width", "100");
-                piece.setAttribute("height", "32");
-                piece.setAttribute("stroke-width", "4");
-                piece.setAttribute("stroke", "black");
-                piece.setAttribute("fill", "white");
-
-
-
-                var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
-                text.setAttribute("fill", "black");
-                text.setAttribute("x", "16")
-                text.setAttribute("y", 28+i*16);
-                text.appendChild(document.createTextNode(name))
-                piecentext.appendChild(piece)
-                piecentext.appendChild(text)
-                group.appendChild(piecentext)
+            if (item_width>width) width = item_width
             }
+
+        this.render_item_box = function(width){
+            var piece = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            piece.setAttribute("id", name+":box");
+            piece.setAttribute("x", "0");
+            piece.setAttribute("y", i*16);
+            piece.setAttribute("width", 32+width);
+            piece.setAttribute("height", "32");
+            piece.setAttribute("stroke-width", "4");
+            piece.setAttribute("stroke", "black");
+            piece.setAttribute("fill", "white");
+            piecentext.insertBefore(piece,piecentext.firstChild)
+        }
 
     }
 
@@ -95,23 +92,31 @@ function blockmenu(x, y, parent, commands) {
     }
 
     this.connectAll = function() {
-       	for (var i = 0, cmd; cmd = commands[i]; i++) {
+       	/*for (var i = 0, cmd; cmd = commands[i]; i++) {
          	if(cmd.label) {
          	$("#"+cmd.label).bind("mousedown", cmd.handler);
          	}
-        }
-       	//this.connect("mousedown", this.onmousedown);
+        } */
+       	this.connect("mousedown", this.onmousedown);
         //this.connect("dblclick", this.ondblclick);
         //this.connect("mouseover", this.onmouseover);
         //this.connect("contextmenu", this.contextmenu);
         //this.connect("mouseout", this.onmouseout);
         //this.connect("mousedown", this.onmousedown);
-        this.connect("mouseup", this.onmouseup);
+        //this.connect("mouseup", this.onmouseup);
         //this.connect("mousemove", this.onmousemove);
     }
 
-    this.onmouseup =function(e){
-        this.remove()
+    this.onmousedown =function(e){
+        for (var i = 0, cmd; cmd = commands[i]; i++) {
+
+            var target = e.target.id.match(/[^:]+:/).toString()
+            target = target.substring(0,target.length-1)
+            if (target==cmd.label) {
+                cmd.handler(e.originalEvent.layerX, e.originalEvent.layerY)
+                return
+            }
+        }
     }
 
 

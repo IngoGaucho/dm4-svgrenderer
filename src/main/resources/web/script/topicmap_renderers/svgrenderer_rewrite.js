@@ -21,18 +21,11 @@ function SvgRenderer() {
     var model = new DefaultTopicmapViewmodel()
 
     //dom
-    this.dom = $("<div>", {id: "TopicmapDiv"})
+    this.dom = $("<div>", {id: "canvas"})
     var svg_topicmap = document.createElementNS("http://www.w3.org/2000/svg", "svg")
     var dom_id = "Topicmap"
     svg_topicmap.setAttribute("id", dom_id)
 
-
-    // An invisible rect to have something to touch
-    //svg_topicmap.setAttribute("x","0")
-    //svg_topicmap.setAttribute("y","-25")
-    //svg_topicmap.setAttribute("fill", "transparent");
-    //svg_topicmap.setAttribute("stroke", "none");
-    // ==
 
     this.get_info = function() {
         return {
@@ -50,16 +43,15 @@ function SvgRenderer() {
 
     this.display_topicmap = function(topicmap, no_history_update) {
         //Clear any previous DOMs
-        if (svg_topicmap.hasChildNodes()){
-            while ( svg_topicmap.childNodes.length >= 1 ){
-                svg_topicmap.removeChild( svg_topicmap.firstChild );
-            }
-
-        }
+        this.clear()
+        $('#Topicmap').children().each(function () {
+            //$("#Topicmap").empty()
+            $("#"+this.id).empty()
+            $("#"+this.id).remove()
+        })
         if($("#contextmenu").length==1) $("#contextmenu").remove()
         model.translate_by(topicmap.trans_x, topicmap.trans_y)
 
-        alert("hello")
         this.dom.append(svg_topicmap);
 
 
@@ -167,11 +159,8 @@ function SvgRenderer() {
      * OpenLayers map (geomaps renderer).
      */
     this.clear = function() {
-
         model.translate_by(-model.trans_x, -model.trans_y)
-
         model.clear()
-
     }
 
     // === Selection ===
@@ -204,11 +193,19 @@ function SvgRenderer() {
 
     this.scroll_topic_to_center = function(topic_id) {}
 
-    this.begin_association = function(topic_id, x, y) {}
+    this.begin_association = function(topic_id, x, y) {
+        action_topic = model.get_topic(topic_id)
+        prevx = action_topic.x+model.trans_x
+        prevy = action_topic.y+model.trans_y
+        render_temporary_assoc(action_topic, x-prevx, y-prevy)
+        assoc_draw = true
+    }
 
     this.refresh = function() {}
 
-    this.close_context_menu = function() {}
+    this.close_context_menu = function() {
+        if($("#contextmenu").length==1) $("#contextmenu").remove()
+    }
 
     // === Left SplitPanel Component ===
 
@@ -265,8 +262,11 @@ function SvgRenderer() {
             group.appendChild(text)
 
             //Append to parent
+        $("#Topicmap").append(group)
+        $("#"+topic.id).show()
+        //svg_topicmap.appendChild(group)
 
-            $("#"+dom_id).append(group)
+
 
     }
 
@@ -324,7 +324,8 @@ function SvgRenderer() {
 
         //Append to parent
 
-        $("#"+dom_id).prepend(group)
+        //svg_topicmap.prependChild(group)
+        svg_topicmap.insertBefore(group,svg_topicmap.firstChild)
 
         function init_position() {
             var x = Math.floor(svg_topicmap.getAttribute("width")/2)
@@ -336,9 +337,9 @@ function SvgRenderer() {
     function render_temporary_assoc(topic, dx,dy){
         //Vars for drawing
 
-        var angle = Math.atan((dy-topic.y)/(dx-topic.x))*180/Math.PI
-        var length = Math.sqrt(Math.pow(dy-topic.y,2)+Math.pow(dx-topic.x,2))
-        if (topic.x>dx) angle = 180+angle
+        var angle = Math.atan((dy)/(dx))*180/Math.PI
+        var length = Math.sqrt(Math.pow(dy,2)+Math.pow(dx,2))
+        if (dx<0) angle = 180+angle
         var color = "grey"
         //group
         var group = document.createElementNS("http://www.w3.org/2000/svg", "g")
@@ -364,7 +365,7 @@ function SvgRenderer() {
 
         //Append to parent
 
-        $("#"+dom_id).prepend(group)
+        svg_topicmap.insertBefore(group,svg_topicmap.firstChild)
     }
 
     function remove_temporary_assoc(){
@@ -465,8 +466,10 @@ function SvgRenderer() {
     var assoc_draw = false
 
     this.onmousedown = function(e) {
-        prevx = e.clientX
-        prevy = e.clientY
+        if(!assoc_draw){
+            prevx = e.originalEvent.layerX
+            prevy = e.originalEvent.layerY
+        }
         target_id = e.target.id.match(/[0-9]+/)
         if(target_id){
             if(model.topic_exists(target_id)){
@@ -476,7 +479,7 @@ function SvgRenderer() {
                     render_temporary_assoc(action_topic,action_topic.x,action_topic.y)
                     assoc_draw = true
                 }
-                else {
+                else if (e.button == 0){
                     drag_topic = true
                 }
             } else if(model.association_exists(target_id)){
@@ -484,15 +487,15 @@ function SvgRenderer() {
                 cluster = cluster || model.create_cluster(model.get_association(target_id))
                 drag_cluster = true
             }
-        } else {
+        } else if (e.button == 0 && $("#contextmenu").length==0) {
             drag_topicmap = true
         }
     }
 
     this.onmouseup = function(e) {
         var target = e.target.id.match(/[0-9]+/)
-        drag_end(target)
-        if($("#contextmenu").length==1) $("#contextmenu").remove()
+        if($("#contextmenu").length==0) drag_end(target)
+        if($("#contextmenu").length==1 && e.button == 0) $("#contextmenu").remove()
     }
 
     function drag_end(target){
@@ -518,8 +521,8 @@ function SvgRenderer() {
 
 
     this.onmousemove = function(e) {
-        var dx = (e.clientX-prevx)
-        var dy = (e.clientY-prevy)
+        var dx = (e.originalEvent.layerX-prevx)
+        var dy = (e.originalEvent.layerY-prevy)
         if(assoc_draw){
             move_temporary_assoc(action_topic,dx,dy)
             return
@@ -536,12 +539,29 @@ function SvgRenderer() {
            model.translate_by(dx, dy)
         }
 
-        prevx = e.clientX
-        prevy = e.clientY
+        prevx = e.originalEvent.layerX
+        prevy = e.originalEvent.layerY
     }
 
     this.onmouseout = function(e) {
         e.preventDefault()
     }
 
+    this.contextmenu = function (e){
+        if($("#contextmenu").length==1) $("#contextmenu").remove()
+        e.preventDefault()
+        target_id = e.target.id.match(/[0-9]+/)
+        var commands
+        if(target_id){
+            if(model.topic_exists(target_id)){
+                commands = dm4c.get_topic_commands(dm4c.selected_object, "context-menu")
+            } else if(model.association_exists(target_id)){
+                commands = dm4c.get_association_commands(dm4c.selected_object, "context-menu")
+            }
+        }else{
+           commands = dm4c.get_canvas_commands(e.originalEvent.layerX, e.originalEvent.layerY, "context-menu")
+        }
+        var menu = new blockmenu(e.originalEvent.layerX, e.originalEvent.layerY, "#"+dom_id, commands)
+            menu.render()
+    }
 }
