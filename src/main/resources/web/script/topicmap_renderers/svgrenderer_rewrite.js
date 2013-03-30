@@ -130,11 +130,43 @@ function SvgRenderer() {
          }
     }
 
-    this.update_topic = function(topic, refresh_canvas) {}
+    this.update_topic = function(topic, refresh_canvas) {
+        var ct = model.get_topic(topic.id)
+        if (!ct) {
+            return
+        }
+        // update model
+        ct.update(topic)
+        alert(topic.type_uri)
+        var icon_src = dm4c.get_icon_src(topic.type_uri)
+        var img = document.getElementById(topic.id+"img")
+        img.setAttributeNS("http://www.w3.org/1999/xlink","href","http://"+document.location.host+icon_src);
 
-    this.update_association = function(assoc, refresh_canvas) {}
+        document.getElementById(topic.id+"text").textContent = topic.value
 
-    this.remove_topic = function(topic_id, refresh_canvas) {}
+    }
+
+    this.update_association = function(assoc, refresh_canvas) {
+        var ca = model.get_association(assoc.id)
+        if (!ca) {
+            return
+        }
+        // update model
+        ca.update(assoc)
+        var color
+        if (assoc.type_uri) color = dm4c.get_type_color(assoc.type_uri)
+        if (!color) color = "grey"
+        document.getElementById(assoc.id+"line").setAttribute("stroke", color);
+    }
+
+    this.remove_topic = function(topic_id, refresh_canvas) {
+        var ct = model.remove_topic(topic_id)
+        if (!ct) {
+            return
+        }
+        model.reset_highlight_conditionally(ct.id)
+        $("#"+ct.id).remove()
+    }
 
     /**
      * Removes an association from the canvas (model) and optionally refreshes the canvas (view).
@@ -142,14 +174,22 @@ function SvgRenderer() {
      *
      * @param   refresh_canvas  Optional - if true, the canvas is refreshed.
      */
-    this.remove_association = function(assoc_id, refresh_canvas) {}
+    this.remove_association = function(assoc_id, refresh_canvas) {
+        // 1) update model
+        var ca = model.remove_association(assoc_id)
+        if (!ca) {
+            return
+        }
+        model.reset_highlight_conditionally(assoc_id)
+        $("#"+ca.id).remove()
+    }
 
     /**
      * Checks if a topic is visible on the canvas.
      *
      * @return  a boolean
      */
-    this.topic_exists = function(topic_id) {}
+    this.topic_exists = function(topic_id) {return model.topic_exists(topic_id)}
 
     /**
      * Clears the model: removes all topics and associations and resets the selection.
@@ -191,7 +231,13 @@ function SvgRenderer() {
 
     // ---
 
-    this.scroll_topic_to_center = function(topic_id) {}
+    this.scroll_topic_to_center = function(topic_id) {
+        model.get_topic(topic_id)
+
+        model.translateBy(-model.trans_x+topic.x,-model.trans_y+topic.y)
+        // fire event
+        dm4c.fire_event("post_move_canvas", model.trans_x, model.trans_y)
+    }
 
     this.begin_association = function(topic_id, x, y) {
         action_topic = model.get_topic(topic_id)
@@ -485,7 +531,7 @@ function SvgRenderer() {
             } else if(model.association_exists(target_id)){
                 dm4c.do_select_association(target_id)
                 cluster = cluster || model.create_cluster(model.get_association(target_id))
-                drag_cluster = true
+                if (e.button == 0) drag_cluster = true
             }
         } else if (e.button == 0 && $("#contextmenu").length==0) {
             drag_topicmap = true

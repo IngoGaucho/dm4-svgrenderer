@@ -92,11 +92,6 @@ function blockmenu(x, y, parent, commands) {
     }
 
     this.connectAll = function() {
-       	/*for (var i = 0, cmd; cmd = commands[i]; i++) {
-         	if(cmd.label) {
-         	$("#"+cmd.label).bind("mousedown", cmd.handler);
-         	}
-        } */
        	this.connect("mousedown", this.onmousedown);
         //this.connect("dblclick", this.ondblclick);
         //this.connect("mouseover", this.onmouseover);
@@ -109,12 +104,11 @@ function blockmenu(x, y, parent, commands) {
 
     this.onmousedown =function(e){
         for (var i = 0, cmd; cmd = commands[i]; i++) {
-
+            $("#contextmenu").remove()
             var target = e.target.id.match(/[^:]+:/).toString()
             target = target.substring(0,target.length-1)
             if (target==cmd.label) {
                 cmd.handler(e.originalEvent.layerX, e.originalEvent.layerY)
-                return
             }
         }
     }
