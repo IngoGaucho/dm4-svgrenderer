@@ -98,19 +98,27 @@ function blockmenu(x, y, parent, commands) {
         //this.connect("contextmenu", this.contextmenu);
         //this.connect("mouseout", this.onmouseout);
         //this.connect("mousedown", this.onmousedown);
-        //this.connect("mouseup", this.onmouseup);
+        this.connect("mouseup", this.onmouseup);
         //this.connect("mousemove", this.onmousemove);
     }
 
     this.onmousedown =function(e){
         for (var i = 0, cmd; cmd = commands[i]; i++) {
-            $("#contextmenu").remove()
             var target = e.target.id.match(/[^:]+:/).toString()
             target = target.substring(0,target.length-1)
             if (target==cmd.label) {
                 cmd.handler(e.originalEvent.layerX, e.originalEvent.layerY)
             }
         }
+
+    }
+    var firstcall = true
+    this.onmouseup =function(e){
+        if (firstcall){
+            firstcall = false
+            return
+        }
+        $("#contextmenu").remove()
     }
 
 

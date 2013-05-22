@@ -245,6 +245,7 @@ function SvgRenderer() {
         prevy = action_topic.y+model.trans_y
         render_temporary_assoc(action_topic, x-prevx, y-prevy)
         assoc_draw = true
+        dont_stop_drawing = true
     }
 
     this.refresh = function() {}
@@ -486,7 +487,7 @@ function SvgRenderer() {
     }
 
     this.connectAll = function() {
-       	this.connect("click", this.onmouseup); //mouseup isn't fired upon click in ffox
+       	this.connect("click", this.onclick); //mouseup isn't fired upon click in ffox
         //this.connect("dblclick", this.ondblclick);
         //this.connect("mouseover", this.onmouseover);
         this.connect("contextmenu", this.contextmenu);
@@ -520,7 +521,6 @@ function SvgRenderer() {
         if(target_id){
             if(model.topic_exists(target_id)){
                 action_topic= model.get_topic(target_id)
-                dm4c.do_select_topic(target_id)
                 if(e.shiftKey){
                     render_temporary_assoc(action_topic,action_topic.x,action_topic.y)
                     assoc_draw = true
@@ -529,7 +529,6 @@ function SvgRenderer() {
                     drag_topic = true
                 }
             } else if(model.association_exists(target_id)){
-                dm4c.do_select_association(target_id)
                 cluster = cluster || model.create_cluster(model.get_association(target_id))
                 if (e.button == 0) drag_cluster = true
             }
@@ -538,10 +537,22 @@ function SvgRenderer() {
         }
     }
 
+    this.onclick = function(e) {
+        target_id = e.target.id.match(/[0-9]+/)
+        if(target_id){
+            if(model.topic_exists(target_id)){
+                dm4c.do_select_topic(target_id)
+            } else if(model.association_exists(target_id)){
+                dm4c.do_select_association(target_id)
+            }
+        }
+    }
+    var dont_stop_drawing = false
     this.onmouseup = function(e) {
         var target = e.target.id.match(/[0-9]+/)
         if($("#contextmenu").length==0) drag_end(target)
-        if($("#contextmenu").length==1 && e.button == 0) $("#contextmenu").remove()
+        if($("#contextmenu").length==1 && e.button == 0 && !dont_stop_drawing) $("#contextmenu").remove()
+        if(dont_stop_drawing) dont_stop_drawing= false
     }
 
     function drag_end(target){
@@ -562,6 +573,7 @@ function SvgRenderer() {
                 dm4c.do_create_association("dm4.core.association", topic)
             }
         }
+
     }
 
 
@@ -600,8 +612,10 @@ function SvgRenderer() {
         var commands
         if(target_id){
             if(model.topic_exists(target_id)){
+                dm4c.do_select_topic(target_id)
                 commands = dm4c.get_topic_commands(dm4c.selected_object, "context-menu")
             } else if(model.association_exists(target_id)){
+                dm4c.do_select_association(target_id)
                 commands = dm4c.get_association_commands(dm4c.selected_object, "context-menu")
             }
         }else{
