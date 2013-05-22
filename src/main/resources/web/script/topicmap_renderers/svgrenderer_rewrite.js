@@ -43,6 +43,8 @@ function SvgRenderer() {
 
     this.display_topicmap = function(topicmap, no_history_update) {
         //Clear any previous DOMs
+        //todo clean
+
         this.clear()
         $('#Topicmap').children().each(function () {
             //$("#Topicmap").empty()
@@ -111,7 +113,7 @@ function SvgRenderer() {
         }
         //
         return topic
-
+        //todo schlecht und billig
         function init_position() {
             if (topic.x == undefined || topic.y == undefined) {
                 topic.x = Math.floor(svg_topicmap.getAttribute("width")/2)
@@ -137,7 +139,6 @@ function SvgRenderer() {
         }
         // update model
         ct.update(topic)
-        alert(topic.type_uri)
         var icon_src = dm4c.get_icon_src(topic.type_uri)
         var img = document.getElementById(topic.id+"img")
         img.setAttributeNS("http://www.w3.org/1999/xlink","href","http://"+document.location.host+icon_src);
@@ -289,6 +290,9 @@ function SvgRenderer() {
 
             //Image
             var icon_src = dm4c.get_icon_src(topic.type_uri)
+            // todo reveal SVG view config from topic type
+            //var topic_type = dm4c.get_topic_type(topic.type_uri)
+            //var viewConfigs = topic_type.get_related_topics("aggregatoion", { child_role_type: "dm4.svg.renderer.viewconfig" })
             var ball = document.createElementNS("http://www.w3.org/2000/svg", "image");
             ball.setAttribute("id",topic.id+"img")
             ball.setAttributeNS("http://www.w3.org/1999/xlink","href","http://"+document.location.host+icon_src);
@@ -330,6 +334,8 @@ function SvgRenderer() {
             t2 = init_position()
         } else {t2 = model.get_topic(assoc.role_2.topic_id)}
 
+        // todo comment!
+        // Calc angle to x-axis
         var angle = Math.atan((t2.y-t1.y)/(t2.x-t1.x))*180/Math.PI
         var length = Math.sqrt(Math.pow(t2.y-t1.y,2)+Math.pow(t2.x-t1.x,2))
         if (t1.x>t2.x) angle = 180+angle
@@ -517,14 +523,17 @@ function SvgRenderer() {
             prevx = e.originalEvent.layerX
             prevy = e.originalEvent.layerY
         }
+        //get id with regEx
         target_id = e.target.id.match(/[0-9]+/)
         if(target_id){
+
             if(model.topic_exists(target_id)){
                 action_topic= model.get_topic(target_id)
                 if(e.shiftKey){
                     render_temporary_assoc(action_topic,action_topic.x,action_topic.y)
                     assoc_draw = true
                 }
+                //ignore other buttons than left mouse button (==0)
                 else if (e.button == 0){
                     drag_topic = true
                 }
@@ -547,7 +556,9 @@ function SvgRenderer() {
             }
         }
     }
+    //workaround draw assoc from contextmenu bug
     var dont_stop_drawing = false
+
     this.onmouseup = function(e) {
         var target = e.target.id.match(/[0-9]+/)
         if($("#contextmenu").length==0) drag_end(target)
