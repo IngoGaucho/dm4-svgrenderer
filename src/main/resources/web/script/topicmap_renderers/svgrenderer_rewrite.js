@@ -245,7 +245,7 @@ function SvgRenderer() {
         prevx = action_topic.x+model.trans_x
         prevy = action_topic.y+model.trans_y
         render_temporary_assoc(action_topic, x-prevx, y-prevy)
-        assoc_draw_from_shift = true
+        assoc_draw_from_menu = true
     }
 
     this.refresh = function() {}
@@ -532,7 +532,7 @@ function SvgRenderer() {
         //If we are in on assoc_draw_from_menu state, we must handle the drag_end in the onmousedown rather the
         //onmouseup event
 
-        if(assoc_draw_from_menu) drag_end(target)
+        if(assoc_draw_from_menu && $("#contextmenu").length==0) drag_end()
 
         if(target_id){
             if(model.topic_exists(target_id)){
@@ -558,7 +558,6 @@ function SvgRenderer() {
         target_id = e.target.id.match(/[0-9]+/)
 
         //
-        if ($("#contextmenu").length!=0) prevent_drag_end = true
         if(target_id){
             if(model.topic_exists(target_id)){
                 dm4c.do_select_topic(target_id)
@@ -570,18 +569,18 @@ function SvgRenderer() {
 
 
     this.onmouseup = function(e) {
-        var target = e.target.id.match(/[0-9]+/)
+        target_id = e.target.id.match(/[0-9]+/)
         //Since the drawing behavior of assocs differ from wether its called from the menu or by shift+drag we must not
         //fire the drag_end here. This would end the dragging immediantly after click on the menu items.
-        if(!draw_assoc_from_menu) drag_end(target)
+        if(!assoc_draw_from_menu) drag_end()
         if($("#contextmenu").length==1 && e.button == 0) $("#contextmenu").remove()
     }
 
-    function drag_end(target){
+    function drag_end(){
         if (drag_topic) {
             //Set drag_topic flag false and write to db
             drag_topic = false
-            dm4c.fire_event("post_move_topic", model.get_topic(target_id))
+            dm4c.fire_event("post_move_topic", target_id)
         }else if (drag_cluster) {
             //Set drag_cluster flag false and write to db
             drag_cluster = false
@@ -595,8 +594,8 @@ function SvgRenderer() {
             remove_temporary_assoc()
             assoc_draw_from_shift = false
             assoc_draw_from_menu = false
-            if(target){
-                var topic = dm4c.fetch_topic(target)
+            if(target_id){
+                var topic = dm4c.fetch_topic(target_id)
                 dm4c.do_create_association("dm4.core.association", topic)
             }
         }
@@ -608,8 +607,7 @@ function SvgRenderer() {
     this.onmousemove = function(e) {
         var dx = (e.originalEvent.layerX-prevx)
         var dy = (e.originalEvent.layerY-prevy)
-        if(assoc_draw_from_shift){
-        alert("pain")
+        if(assoc_draw_from_shift||assoc_draw_from_menu){
             move_temporary_assoc(action_topic,dx,dy)
             return
         }else if(drag_topic){
