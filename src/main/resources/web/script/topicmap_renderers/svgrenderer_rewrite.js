@@ -26,6 +26,25 @@ function SvgRenderer() {
     var dom_id = "Topicmap"
     svg_topicmap.setAttribute("id", dom_id)
 
+    //A Fancy filter for highlighting
+
+    var defs = document.createElementNS("http://www.w3.org/2000/svg","defs")
+
+    var filter = document.createElementNS("http://www.w3.org/2000/svg","defs")
+    filter.setAttribute("id","f1")
+    filter.setAttribute("x","0")
+    filter.setAttribute("y","0")
+
+    var gfilter = document.createElementNS("http://www.w3.org/2000/svg","feGaussianBlur")
+    gfilter.setAttribute("in","SourceGraphic")
+    gfilter.setAttribute("stdDeviation","2")
+
+    filter.appendChild(gfilter)
+    defs.appendChild(filter)
+
+    svg_topicmap.appendChild(defs)
+
+    // end of filter
 
     this.get_info = function() {
         return {
@@ -43,15 +62,13 @@ function SvgRenderer() {
 
     this.display_topicmap = function(topicmap, no_history_update) {
         //Clear any previous DOMs
-        //todo clean
 
         this.clear()
-        $('#Topicmap').children().each(function () {
-            //$("#Topicmap").empty()
-            $("#"+this.id).empty()
-            $("#"+this.id).remove()
-        })
+
+        //remove ctx menu from predecessing svg maps
         if($("#contextmenu").length==1) $("#contextmenu").remove()
+
+        //init model trans
         model.translate_by(topicmap.trans_x, topicmap.trans_y)
 
         this.dom.append(svg_topicmap);
@@ -111,6 +128,7 @@ function SvgRenderer() {
         if (do_select) {
             model.set_highlight_topic(topic.id)
         }
+
         //
         return topic
         //todo schlecht und billig
@@ -139,6 +157,8 @@ function SvgRenderer() {
         }
         // update model
         ct.update(topic)
+        alert("update")
+        //update icon in case it was retyped
         var icon_src = dm4c.get_icon_src(topic.type_uri)
         var img = document.getElementById(topic.id+"img")
         img.setAttributeNS("http://www.w3.org/1999/xlink","href","http://"+document.location.host+icon_src);
@@ -232,10 +252,10 @@ function SvgRenderer() {
 
     // ---
 
-    this.scroll_topic_to_center = function(topic_id) {
-        model.get_topic(topic_id)
+    this.scroll_topic_to_center = function(t_id) {
+        topic = model.get_topic(t_id)
 
-        model.translateBy(-model.trans_x+topic.x,-model.trans_y+topic.y)
+        model.translate_by(-model.trans_x+topic.x,-model.trans_y+topic.y)
         // fire event
         dm4c.fire_event("post_move_canvas", model.trans_x, model.trans_y)
     }
@@ -301,6 +321,15 @@ function SvgRenderer() {
             ball.setAttribute("height","32");
             group.appendChild(ball)
 
+            //touchball
+
+            var touchball = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                ball.setAttribute("id",topic.id+"touchblock")
+                ball.setAttribute("x",0)
+                ball.setAttribute("y",0)
+                ball.setAttribute("r", "20");
+                ball.setAttribute("fill","transparent");
+                ball.setAttribute("filter","url(#f1)");
             //Text
 
             var text = document.createElementNS("http://www.w3.org/2000/svg", "text")
@@ -580,7 +609,8 @@ function SvgRenderer() {
         if (drag_topic) {
             //Set drag_topic flag false and write to db
             drag_topic = false
-            dm4c.fire_event("post_move_topic", target_id)
+
+            dm4c.fire_event("post_move_topic", model.get_topic(target_id))
         }else if (drag_cluster) {
             //Set drag_cluster flag false and write to db
             drag_cluster = false
