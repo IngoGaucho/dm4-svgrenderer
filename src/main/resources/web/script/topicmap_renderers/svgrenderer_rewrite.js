@@ -245,8 +245,7 @@ function SvgRenderer() {
         prevx = action_topic.x+model.trans_x
         prevy = action_topic.y+model.trans_y
         render_temporary_assoc(action_topic, x-prevx, y-prevy)
-        assoc_draw = true
-        dont_stop_drawing = true
+        assoc_draw_from_shift = true
     }
 
     this.refresh = function() {}
@@ -516,22 +515,31 @@ function SvgRenderer() {
     var cx = 0
     var cy = 0
     var prevx, prevy
-    var assoc_draw = false
+    var assoc_draw_from_shift = false
+    var assoc_draw_from_menu = false
 
     this.onmousedown = function(e) {
-        if(!assoc_draw){
+        // coord monitoring is done my on mouse move in assoc_draw_* state
+        if(!assoc_draw_from_shift && !assoc_draw_from_menu){
             prevx = e.originalEvent.layerX
             prevy = e.originalEvent.layerY
         }
-        //get id with regEx
-        target_id = e.target.id.match(/[0-9]+/)
-        if(target_id){
+        //get id from DOM Label with regEx: just give me all numbers. By agreement, A DOM label never not include
+        //numbers that are not the ID
 
+        target_id = e.target.id.match(/[0-9]+/)
+
+        //If we are in on assoc_draw_from_menu state, we must handle the drag_end in the onmousedown rather the
+        //onmouseup event
+
+        if(assoc_draw_from_menu) drag_end(target)
+
+        if(target_id){
             if(model.topic_exists(target_id)){
                 action_topic= model.get_topic(target_id)
                 if(e.shiftKey){
                     render_temporary_assoc(action_topic,action_topic.x,action_topic.y)
-                    assoc_draw = true
+                    assoc_draw_from_shift = true
                 }
                 //ignore other buttons than left mouse button (==0)
                 else if (e.button == 0){
@@ -548,6 +556,9 @@ function SvgRenderer() {
 
     this.onclick = function(e) {
         target_id = e.target.id.match(/[0-9]+/)
+
+        //
+        if ($("#contextmenu").length!=0) prevent_drag_end = true
         if(target_id){
             if(model.topic_exists(target_id)){
                 dm4c.do_select_topic(target_id)
@@ -556,29 +567,34 @@ function SvgRenderer() {
             }
         }
     }
-    //workaround draw assoc from contextmenu bug
-    var dont_stop_drawing = false
+
 
     this.onmouseup = function(e) {
         var target = e.target.id.match(/[0-9]+/)
-        if($("#contextmenu").length==0) drag_end(target)
-        if($("#contextmenu").length==1 && e.button == 0 && !dont_stop_drawing) $("#contextmenu").remove()
-        if(dont_stop_drawing) dont_stop_drawing= false
+        //Since the drawing behavior of assocs differ from wether its called from the menu or by shift+drag we must not
+        //fire the drag_end here. This would end the dragging immediantly after click on the menu items.
+        if(!draw_assoc_from_menu) drag_end(target)
+        if($("#contextmenu").length==1 && e.button == 0) $("#contextmenu").remove()
     }
 
     function drag_end(target){
         if (drag_topic) {
+            //Set drag_topic flag false and write to db
             drag_topic = false
             dm4c.fire_event("post_move_topic", model.get_topic(target_id))
         }else if (drag_cluster) {
+            //Set drag_cluster flag false and write to db
             drag_cluster = false
             dm4c.fire_event("post_move_cluster", cluster)
         }else if (drag_topicmap) {
+            //Set drag_topicmap flag false and write to db
             drag_topicmap = false
             dm4c.fire_event("post_move_canvas", model.trans_x, model.trans_y)
-        }else if (assoc_draw){
+        }else if (assoc_draw_from_shift||assoc_draw_from_menu){
+            //Set assoc_draw_from_shift flag false, remove the temporary DOM object, check target and write to db
             remove_temporary_assoc()
-            assoc_draw = false
+            assoc_draw_from_shift = false
+            assoc_draw_from_menu = false
             if(target){
                 var topic = dm4c.fetch_topic(target)
                 dm4c.do_create_association("dm4.core.association", topic)
@@ -592,7 +608,8 @@ function SvgRenderer() {
     this.onmousemove = function(e) {
         var dx = (e.originalEvent.layerX-prevx)
         var dy = (e.originalEvent.layerY-prevy)
-        if(assoc_draw){
+        if(assoc_draw_from_shift){
+        alert("pain")
             move_temporary_assoc(action_topic,dx,dy)
             return
         }else if(drag_topic){
@@ -633,6 +650,8 @@ function SvgRenderer() {
            commands = dm4c.get_canvas_commands(e.originalEvent.layerX, e.originalEvent.layerY, "context-menu")
         }
         var menu = new blockmenu(e.originalEvent.layerX, e.originalEvent.layerY, "#"+dom_id, commands)
-            menu.render()
+        menu.render()
+
+
     }
 }

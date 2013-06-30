@@ -98,7 +98,7 @@ function blockmenu(x, y, parent, commands) {
         //this.connect("contextmenu", this.contextmenu);
         //this.connect("mouseout", this.onmouseout);
         //this.connect("mousedown", this.onmousedown);
-        this.connect("mouseup", this.onmouseup);
+        //this.connect("mouseup", this.onmouseup);
         //this.connect("mousemove", this.onmousemove);
     }
 
@@ -111,14 +111,6 @@ function blockmenu(x, y, parent, commands) {
             }
         }
 
-    }
-    var firstcall = true
-    this.onmouseup =function(e){
-        if (firstcall){
-            firstcall = false
-            return
-        }
-        $("#contextmenu").remove()
     }
 
 
